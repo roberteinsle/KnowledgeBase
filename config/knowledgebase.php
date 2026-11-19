@@ -14,6 +14,9 @@ return [
         'es' => 'Español',
     ],
 
+    // Short commit hash of the running image (written by the Docker build), shown in the account menu.
+    'version' => is_file(base_path('VERSION_HASH')) ? trim((string) file_get_contents(base_path('VERSION_HASH'))) : 'dev',
+
     'display_timezone' => env('DISPLAY_TIMEZONE', 'Europe/Berlin'),
 
     'magic_link' => [

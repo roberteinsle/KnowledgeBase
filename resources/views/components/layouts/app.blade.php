@@ -67,6 +67,7 @@
                         <x-kb-icon name="logout" class="size-4 text-slate-500" /> {{ __('Sign out') }}
                     </button>
                 </form>
+                <p class="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">{{ __('Version') }} {{ config('knowledgebase.version') }}</p>
             </div>
         </div>
     </div>

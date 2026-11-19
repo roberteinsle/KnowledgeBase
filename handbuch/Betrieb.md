@@ -57,7 +57,7 @@ Da die App nur über den Proxy erreichbar ist, vertraut sie der weitergeleiteten
 
 ## Updates und Rollback
 
-Jeder Push auf `main` löst Tests, Image-Build und das Redeploy aus. Für einen Rollback in Coolify `APP_TAG` auf einen `sha-…`-Tag setzen und neu deployen.
+Jeder Push auf `main` löst Tests, Image-Build und das Redeploy aus; das Image bekommt dabei die Tags `latest` und `sha-<commit>`. Welche Version läuft, steht unten im Kontomenü (oben rechts, z. B. „Version c76fb8f“) – so lässt sich prüfen, ob ein Deploy angekommen ist. Für einen Rollback in Coolify `APP_TAG` auf einen `sha-…`-Tag setzen und neu deployen.
 
 ## Sicherheit
 
