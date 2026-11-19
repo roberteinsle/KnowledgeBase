@@ -22,7 +22,7 @@
             </div>
             <div class="flex gap-2">
                 <button type="submit" class="btn-primary"><x-kb-icon name="duplicate" class="size-4" /> {{ __('Copy') }}</button>
-                <a href="{{ route('pages.show', $page) }}" class="btn-ghost">{{ __('Cancel') }}</a>
+                <a href="{{ $page->url() }}" class="btn-ghost">{{ __('Cancel') }}</a>
             </div>
         </form>
     @endif

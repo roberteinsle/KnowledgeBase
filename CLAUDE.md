@@ -6,74 +6,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Knowledgebase
 
-Wissensdatenbank für Teams: Workspace → Bereiche (Spaces) → verschachtelte Seiten mit Versionen, Labels, Anhängen, Volltextsuche und Markdown-Import/-Export. Für Teams, die Dokumentation selbst hosten wollen.
+Self-hosted knowledge base for teams: workspace → spaces → nested pages with versions, labels, attachments, full-text search and Markdown import/export.
 
-Die gemeinsamen Standards oben gelten vollständig. Hier steht nur, was für dieses Projekt dazukommt oder bewusst abweicht.
+The shared standards above apply in full. This file only lists what this project adds or deliberately does differently.
 
-## Projekt
+## Project
 
-- Sichtbarkeit: öffentlich
-- Sprache der Oberfläche: Deutsch (Standard), dazu Englisch, Französisch, Italienisch, Spanisch
-- Erreichbarkeit: öffentlich → Admin-Bereich `/admin` hinter Cloudflare Access
-- Deploy: automatisch per Webhook (`AUTO_DEPLOY=true`)
-- Queue und Scheduler: keine (`QUEUE_CONNECTION=sync`)
-- Wiki: `scripts/build-wiki.py --push` schreibt nach `<origin>.wiki.git`
+- Visibility: public
+- UI languages: German (default), English, French, Italian, Spanish
+- Reachability: public → admin area `/admin` behind Cloudflare Access
+- Deploy: automatic via webhook (`AUTO_DEPLOY=true`); every push to `main` tags the image `latest` and `sha-<commit>`
+- Queue and scheduler: none (`QUEUE_CONNECTION=sync`)
+- Documentation language: **English** for `handbuch/`, the wiki, `README.md` and this file
+- Wiki: `scripts/build-wiki.py --push` writes `handbuch/` to `<origin>.wiki.git`
 
-## Befehle
+## Commands
 
 ```bash
-docker compose up -d db                        # PostgreSQL 18 (startet im Devcontainer automatisch)
-php artisan serve                              # App :8000 (plus: npm run dev für Vite :5173)
-vendor/bin/pest                                # alle Tests (PostgreSQL, Datenbank app_test)
+docker compose up -d db                        # PostgreSQL 18 (starts automatically in the devcontainer)
+php artisan serve                              # app on :8000 (plus: npm run dev for Vite on :5173)
+vendor/bin/pest                                # all tests (PostgreSQL, database app_test)
 vendor/bin/pest tests/Feature/Pages/PageTest.php
-vendor/bin/pest --filter="moves pages"         # einzelner Test
-vendor/bin/pint                                # Code-Stil
-vendor/bin/phpstan analyse --memory-limit=2G   # Larastan Level 5
-npm run build                                  # Assets (Editor-Bundle wird lazy geladen)
-python3 scripts/build-wiki.py [--push]         # Wiki aus handbuch/
+vendor/bin/pest --filter="moves pages"         # single test
+vendor/bin/pint                                # code style
+vendor/bin/phpstan analyse --memory-limit=2G   # Larastan level 5
+npm run build                                  # assets (the editor bundle is loaded lazily)
+python3 scripts/build-wiki.py [--push]         # wiki from handbuch/
 ```
 
-Xdebug im Devcontainer bremst und lärmt: `export XDEBUG_MODE=off`. Lokal landen Anmeldelinks in `storage/logs/laravel.log` (`MAIL_MAILER=log`).
+Xdebug in the devcontainer is slow and noisy: `export XDEBUG_MODE=off`. Locally, sign-in links end up in `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 
-Slash-Commands: `/login-audit` prüft und härtet den Login-Flow.
+Slash commands: `/login-audit` checks and hardens the login flow.
 
-## Architektur
+## Architecture
 
 ```
-app/Core/            Registries, Aktivitätsprotokoll, Middleware (SecurityHeaders, SetLocale), Rate-Limits
-app/Modules/<Modul>/ je Modul: Models, Services, Contracts, Policies, Http, routes.php, <Modul>ServiceProvider
-app/Filament/        Admin-Oberfläche (/admin) – schreibt nur über die Modul-Services
-resources/views/     Frontend (Blade, kein Livewire); Layouts als anonyme Komponenten x-layouts.app / x-layouts.guest
+app/Core/             registries, activity log, middleware (SecurityHeaders, SetLocale), legacy redirects, rate limits
+app/Modules/<Module>/ per module: Models, Services, Contracts, Policies, Http, Sidebar, routes.php, <Module>ServiceProvider
+app/Filament/         admin UI (/admin) – writes only through the module services
+resources/views/      frontend (Blade, no Livewire); layouts as anonymous components x-layouts.app / x-layouts.guest
+resources/js/         app.js (Alpine), tree.js (sidebar tree, menu, drag & drop), editor.js (TipTap + live preview), passkeys.js
 ```
 
-Module: `Workspace` (Einstellungen, Benutzer, Startseite), `Auth` (Magic Link, Passkeys, TOTP, Konto), `Groups`, `Spaces`, `Pages` (Seiten, Versionen, Labels, Anhänge, Papierkorb, Space-Startseite), `Search`, `ImportExport`. Provider-Reihenfolge in `bootstrap/providers.php`.
+Modules: `Workspace` (settings, users, home page), `Auth` (magic link, passkeys, TOTP, account), `Groups`, `Spaces`, `Pages` (pages, versions, labels, attachments, favorites, trash, space overview, page tree), `Search`, `ImportExport`. Provider order in `bootstrap/providers.php`.
 
-**Modulgrenzen** – Module greifen nie auf Interna anderer Module zu, sondern nur über:
-- **Registries in `app/Core`** (Singletons): `NavigationRegistry` (Hauptnavigation in der Kopfzeile, Kontomenü, mobile Tab-Leiste), `SidebarRegistry` (Abschnitte der linken Leiste: Spaces liefert den Bereichswechsler, Pages den Seitenbaum), `MenuRegistry` (Kontextmenüs `space`, `space.pages`, `page` – z. B. hängt ImportExport „Exportieren“ ins Seitenmenü), `DashboardRegistry` (Widgets der Startseite), `SearchRegistry` (`SearchProvider` je Inhaltstyp), `ImportRegistry`/`ExportRegistry` (Formate). Neue Funktionen hängen sich dort ein, nicht im Layout oder in fremden Controllern.
-- **Menüs:** `MenuItem`-Sichtbarkeit wird pro Bereich entschieden (`visible(User, Space)`), nicht pro Seite – das `page`-Menü wird je Bereich einmal als `<template>` mit Platzhalter `__PAGE__` gerendert und in `resources/js/tree.js` befüllt. URL-Closures bekommen beim `space`-Menü den Slug, beim `page`-Menü die Seiten-ID.
-- **Contracts**: `Spaces\Contracts\CurrentSpace` liefert den Bereich der linken Leiste (gesetzt, per Resolver aus Routenparametern – Spaces für `{space}`, Pages für `{page}` –, sonst zuletzt besuchter, sonst erster lesbarer); Zustand liegt in den Request-Attributen, nie im Service. `Spaces\Contracts\SpaceAccess` ist die einzige Stelle für „was darf dieser Benutzer in diesem Bereich“; `Groups\Contracts\GroupMembership`; `Pages\Contracts\PageWriter` für Seitenänderungen aus anderen Modulen (Import, später MCP/Bases).
-- **Events**: `Spaces\Events\SpaceDeleting` – Pages räumt dort Anhang-Dateien auf.
-- Models anderer Module dürfen gelesen werden (Relationen, Abfragen); geschrieben wird nur über deren Services.
+**Module boundaries** – modules never touch other modules' internals, only:
+- **Registries in `app/Core`** (singletons): `NavigationRegistry` (main navigation in the header, account menu, mobile tab bar), `SidebarRegistry` (sections of the left sidebar: Spaces adds the space switcher, Pages the page tree), `MenuRegistry` (context menus `space`, `space.pages`, `page` – e.g. ImportExport adds the export entries to the page menu), `DashboardRegistry` (home page widgets), `SearchRegistry` (`SearchProvider` per content type), `ImportRegistry`/`ExportRegistry` (formats). New features hook in there, not in the layout or in other modules' controllers.
+- **Menus:** `MenuItem` visibility is decided per space (`visible(User, Space)`), not per page – the `page` menu is rendered once per space as a `<template>` with the placeholder `__PAGE__` and filled in `resources/js/tree.js`. URL closures get the slug for the `space` menu and the page id for the `page` menu.
+- **Contracts**: `Spaces\Contracts\CurrentSpace` provides the space of the sidebar (explicitly set, via resolvers – Spaces for `{space}`, Pages for the current page –, else the last visited, else the first readable space); state lives in request attributes, never in the service. `Spaces\Contracts\SpaceAccess` is the only place that answers "what may this user do in this space". `Groups\Contracts\GroupMembership`; `Pages\Contracts\PageWriter` for page changes from other modules (import, later MCP/Bases).
+- **Events**: `Spaces\Events\SpaceDeleting` – Pages removes attachment files there.
+- Other modules' models may be read (relations, queries); writes only go through their services.
 
-**Regeln, die man leicht bricht:**
-- Jede Abfrage über Seiten/Anhänge filtert mit `SpaceAccess::spaceIdsFor($user)` – auch Suche, Labels, Dashboard-Widgets, Exporte. Bereiche ohne Recht sind unsichtbar.
-- Rollen: `SpaceRole` reader < editor < admin (Policy-Abilities `view`, `contribute`, `moderate`); Workspace-Admins sind überall Bereichsadmin. Die Gruppe *Everyone* (`groups.system_key = 'everyone'`) hat keine gespeicherten Mitglieder, sie gilt implizit für alle.
-- Seiteninhalt ist **Markdown** und die einzige Quelle (Editor, Suche, Import, Export, Diff). Gerendert nur über `MarkdownRenderer` (`html_input => escape`). Der TipTap-Editor (`resources/js/editor.js`) liest/schreibt Markdown in das Textarea, das abgeschickt wird.
-- Jede inhaltliche Änderung erzeugt über `PageService` eine `PageVersion`; `update()` prüft im Controller die mitgeschickte `version` (kein stilles Überschreiben). `amendLatestVersion()` nur für maschinelle Korrekturen direkt nach dem Anlegen (Link-Umschreibung beim Import).
-- Papierkorb = SoftDeletes, immer samt Unterseiten (`descendantIds`). Endgültiges Löschen nur aus dem Papierkorb.
-- Reihenfolge im Baum: `PageService::place()` (Drag & Drop: before/after/inside) nummeriert die Geschwister lückenlos neu; `duplicate()` kopiert Unterseiten, Labels und Anhänge (Dateien werden kopiert, Links im Inhalt umgeschrieben).
-- Bereichssymbole: `spaces.icon_path` auf der privaten Disk (Upload über Filament, nur Rasterbilder), Auslieferung nur über `SpaceIconController` mit Rechteprüfung; `SpaceService::replaceIcon()` löscht die alte Datei.
-- Volltextsuche: generierte `tsvector`-Spalten (`'simple'`-Config, sprachneutral) mit GIN-Index; Suchbegriffe nur über `SearchQuery::toTsQuery()` als gebundener Parameter.
-- Anhänge auf der privaten Disk, Auslieferung nur über `AttachmentController` (inline nur `attachments.inline_mimes`). Import legt nur Dateien mit erlaubter Endung als Anhang an.
-- `Workspace::current()` ist pro Request gecacht (scoped Binding), nie in statischen Properties cachen – sonst laufen Tests ineinander.
-- Keine Passwörter: `password.confirm` (Laravel/Passkey-Paket) zeigt auf `/bestaetigen` (Passkey oder Bestätigungslink); jede Anmeldung zählt 15 Minuten als frische Bestätigung (`Login`-Listener im `AuthServiceProvider`). POST/DELETE-Routen nicht hinter `password.confirm` hängen (der Redirect zurück wäre ein GET) – stattdessen die GET-Seite davor schützen.
-- Filament-Ressourcen/-Seiten nutzen den Trait `App\Filament\Concerns\AdminOnly` und schreiben über `handleRecordCreation`/`handleRecordUpdate` in die Services.
-- URLs und Filament-Slugs sind immer **englisch**, unabhängig von der Sprache des Benutzers (`/spaces/{space}`, `/pages/{page}/edit`, `/admin/users/create`). Die früheren deutschen Pfade leiten per 301 weiter (`App\Core\Http\LegacyRedirects`, je Modul in dessen `routes.php` registriert) – nicht entfernen: alte Anmeldelinks, Lesezeichen und in Seiteninhalten gespeicherte Links (`/seiten/…`, `/anhaenge/…`) hängen daran; der ZIP-Export erkennt beide Formen.
+**Rules that are easy to break:**
+- Every query over pages/attachments filters with `SpaceAccess::spaceIdsFor($user)` – also search, labels, dashboard widgets, exports. Spaces without permission are invisible.
+- Roles: `SpaceRole` reader < editor < admin (policy abilities `view`, `contribute`, `moderate`); workspace admins are space admins everywhere. The group *Everyone* (`groups.system_key = 'everyone'`) has no stored members, it applies to everybody implicitly.
+- Page content is **Markdown** and the single source (editor, search, import, export, diff). Rendered only through `MarkdownRenderer` (`html_input => escape`, table of contents for `[TOC]`/`\[TOC\]`/`[[_TOC_]]`, heading anchors `#h-<slug>`). The TipTap editor (`resources/js/editor.js`) reads/writes Markdown into the textarea that is submitted; the live preview posts to `pages.preview` and uses the same renderer.
+- Every content change creates a `PageVersion` via `PageService`; the controller checks the submitted `version` (no silent overwrite). `amendLatestVersion()` only for machine fix-ups right after creation (link rewriting on import).
+- Trash = SoftDeletes, always including sub-pages (`descendantIds`). Permanent delete only from the trash.
+- Tree order: `PageService::place()` (drag & drop: before/after/inside) renumbers siblings without gaps; `duplicate()` copies sub-pages, labels and attachments (files are copied, links in the content rewritten).
+- Full-text search: generated `tsvector` columns (`'simple'` config, language-neutral) with GIN index; search terms only via `SearchQuery::toTsQuery()` as bound parameter.
+- Attachments on the private disk, delivered only via `AttachmentController` (inline only `attachments.inline_mimes`). Import only creates attachments with allowed extensions.
+- Space icons: `spaces.icon_path` on the private disk (upload via Filament, raster images only), delivered only via `SpaceIconController` with a permission check; `SpaceService::replaceIcon()` deletes the old file.
+- `Workspace::current()` is cached per request (scoped binding) – never cache in static properties, otherwise tests leak into each other.
+- No passwords: `password.confirm` (Laravel/passkey package) points to `/confirm` (passkey or confirmation link); every sign-in counts as fresh confirmation for 15 minutes (`Login` listener in `AuthServiceProvider`). Do not put POST/DELETE routes behind `password.confirm` (the redirect back would be a GET) – protect the GET page in front instead.
+- Filament resources/pages use the trait `App\Filament\Concerns\AdminOnly` and write through the services in `handleRecordCreation`/`handleRecordUpdate`.
+- Test data and examples only with invented names; never take names from screenshots or real systems.
 
-**Übersetzungen:** Quelltexte englisch in `__()`, Übersetzungen in `lang/{de,en,fr,it,es}.json`. `tests/Feature/LocaleTest.php` schlägt fehl, wenn ein `__('…')`-Schlüssel in `de.json` fehlt oder eine Sprache unvollständig ist – neue Texte also immer in allen fünf Dateien ergänzen. Labels, die indirekt übersetzt werden (`NavigationItem::$label`, `MenuItem`-Labels/`activeLabel`/`confirm`, `label()` von Importern/Exportern/SearchProvidern), ebenfalls eintragen – der Test prüft auch `new MenuItem('key', 'Label', …)`. Die Laravel-Texte (`lang/<locale>/*.php`, Grundbestand der JSON-Dateien) stammen einmalig von `laravel-lang/common`; das Paket ist bewusst nicht installiert (verlassene Abhängigkeiten lassen `composer audit` scheitern) – zum Aktualisieren kurz installieren, `php artisan lang:update`, wieder entfernen.
+**URLs:** all paths and Filament slugs are **English**, whatever the UI language (`/spaces/{space}`, `/pages/{page}/edit`, `/admin/users/create`).
+- Pages have readable URLs `/<space-slug>/<title-slug>-<id>` (route `pages.view`, built with `$page->url()` or `Pages\Support\PageUrl::to()`); the id at the end counts, stale space or title parts get a 301 to the canonical URL. The route has no prefix and is registered in `booted()` after all other routes; space slugs must not be in `Space::RESERVED_SLUGS` – add new first path segments there.
+- `/pages/{id}` (route `pages.show`) is the permanent link and redirects to the readable URL. Links stored in content (import, link rewriting) use it, because it survives renames and moves.
+- The former German paths redirect with 301 (`App\Core\Http\LegacyRedirects`, registered per module in its `routes.php`) – do not remove them: old sign-in links, bookmarks and links stored in content (`/seiten/…`, `/anhaenge/…`) depend on them; the ZIP export recognises both forms.
 
-## Abweichungen von den Standards
+**Translations:** source strings in English in `__()`, translations in `lang/{de,en,fr,it,es}.json`. `tests/Feature/LocaleTest.php` fails if a `__('…')` key is missing in `de.json` or a language is incomplete – always add new strings to all five files. Labels translated indirectly (`NavigationItem::$label`, `MenuItem` labels/`activeLabel`/`confirm`, `label()` of importers/exporters/search providers) as well – the test also checks `new MenuItem('key', 'Label', …)`. The Laravel strings (`lang/<locale>/*.php`, the base set of the JSON files) came once from `laravel-lang/common`; the package is deliberately not installed (abandoned dependencies make `composer audit` fail) – to update, install it briefly, run `php artisan lang:update`, remove it again.
 
-- URLs und Filament-Slugs englisch statt deutsch: Die Oberfläche ist fünfsprachig, eine einzelne Sprache in den Adressen wäre für die meisten Benutzer fremd.
-- `Referrer-Policy` ist global `same-origin`, auf der Magic-Link-Seite `no-referrer`.
-- CSP erlaubt `'unsafe-inline'`/`'unsafe-eval'` für Skripte, weil Alpine/Livewire (Filament) Ausdrücke zur Laufzeit auswerten.
+## Deviations from the standards
+
+- URLs and Filament slugs in English instead of German: the UI has five languages, a single language in the addresses would be foreign to most users.
+- Documentation (`handbuch/`, wiki, README, this file) in English instead of German, as requested for this project.
+- `Referrer-Policy` is `same-origin` globally and `no-referrer` on the magic link page.
+- The CSP allows `'unsafe-inline'`/`'unsafe-eval'` for scripts because Alpine/Livewire (Filament) evaluate expressions at runtime.

@@ -26,7 +26,7 @@
                 <ul class="divide-y divide-slate-100">
                     @foreach ($lists[$key] as $page)
                         <li>
-                            <a href="{{ route('pages.show', $page) }}" class="flex items-center gap-3 px-3 py-3 hover:bg-slate-50">
+                            <a href="{{ $page->url() }}" class="flex items-center gap-3 px-3 py-3 hover:bg-slate-50">
                                 <x-kb-icon name="document" class="size-4 shrink-0 text-slate-400" />
                                 <span class="min-w-0 flex-1">
                                     <span class="block truncate font-medium text-slate-900">{{ $page->title }}</span>

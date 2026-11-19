@@ -115,7 +115,10 @@ final class SpaceService
 
     public function uniqueSlug(string $source, ?int $ignoreId = null): string
     {
-        $base = Str::slug($source) ?: 'space';
+        $base = Str::slug($source, '-', 'de') ?: 'space';
+        if (in_array($base, Space::RESERVED_SLUGS, true)) {
+            $base .= '-space';
+        }
         $base = Str::limit($base, 90, '');
         $slug = $base;
         $i = 2;

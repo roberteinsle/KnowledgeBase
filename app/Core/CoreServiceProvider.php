@@ -52,6 +52,7 @@ class CoreServiceProvider extends ServiceProvider
 
         RateLimiter::for('web', fn (Request $request) => Limit::perMinute(180)->by('web:'.$byUserOrIp($request)));
         RateLimiter::for('livewire', fn (Request $request) => Limit::perMinute(240)->by('lw:'.$byUserOrIp($request)));
+        RateLimiter::for('preview', fn (Request $request) => Limit::perMinute(120)->by('preview:'.$byUserOrIp($request)));
         RateLimiter::for('search', fn (Request $request) => Limit::perMinute(60)->by('search:'.$byUserOrIp($request)));
         RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(60)->by('upload:'.$byUserOrIp($request)));
         RateLimiter::for('import', fn (Request $request) => Limit::perHour(20)->by('import:'.$byUserOrIp($request)));

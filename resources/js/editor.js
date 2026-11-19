@@ -14,6 +14,8 @@ export function mountEditor(root) {
     const mount = root.querySelector('[data-editor-mount]')
     const toolbar = root.querySelector('[data-editor-toolbar]')
     const modeToggle = root.querySelector('[data-mode-toggle]')
+    const sourcePane = root.querySelector('[data-source-pane]')
+    const preview = root.querySelector('[data-preview]')
     const form = root.closest('form')
 
     let editor
@@ -42,6 +44,35 @@ export function mountEditor(root) {
     let richMode = true
     const sync = () => { if (richMode) source.value = editor.getMarkdown() }
 
+    // Live preview next to the Markdown source, rendered by the server so it
+    // looks exactly like the saved page. Debounced; only the latest answer wins.
+    let previewTimer = null
+    let previewRequest = 0
+    const renderPreview = () => {
+        clearTimeout(previewTimer)
+        previewTimer = setTimeout(async () => {
+            const request = ++previewRequest
+            try {
+                const response = await fetch(root.dataset.previewUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({ content: source.value }),
+                })
+                if (!response.ok || request !== previewRequest) return
+                const { html } = await response.json()
+                // Escaped and sanitised by the server-side renderer.
+                preview.innerHTML = html.trim() !== '' ? html : `<p class="text-slate-400">${root.dataset.previewEmpty}</p>`
+            } catch (error) {
+                console.warn('Preview failed', error)
+            }
+        }, 350)
+    }
+    source.addEventListener('input', () => { if (!richMode) renderPreview() })
+
     const setMode = (rich) => {
         if (rich === richMode) return
         if (rich) {
@@ -51,7 +82,9 @@ export function mountEditor(root) {
         }
         richMode = rich
         mount.hidden = !rich
-        source.hidden = rich
+        sourcePane.hidden = rich
+        preview.hidden = rich
+        if (!rich) renderPreview()
         toolbar.querySelectorAll('[data-cmd]').forEach((b) => { b.disabled = !rich })
         modeToggle.textContent = rich ? root.dataset.labelSource : root.dataset.labelRich
     }
@@ -69,6 +102,8 @@ export function mountEditor(root) {
         blockquote: () => editor.chain().focus().toggleBlockquote().run(),
         codeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
         hr: () => editor.chain().focus().setHorizontalRule().run(),
+        // "[TOC]" is replaced by a table of contents of the headings when the page is shown.
+        toc: () => editor.chain().focus().insertContent({ type: 'paragraph', content: [{ type: 'text', text: '[TOC]' }] }).run(),
         table: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
         link: () => {
             const previous = editor.getAttributes('link').href || ''
@@ -109,5 +144,5 @@ export function mountEditor(root) {
 
     toolbar.hidden = false
     mount.hidden = false
-    source.hidden = true
+    sourcePane.hidden = true
 }

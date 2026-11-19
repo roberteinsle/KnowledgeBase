@@ -10,6 +10,7 @@ use App\Core\Sidebar\SidebarRegistry;
 use App\Models\User;
 use App\Modules\Pages\Contracts\PageWriter;
 use App\Modules\Pages\Dashboard\RecentPagesWidget;
+use App\Modules\Pages\Http\Controllers\PageController;
 use App\Modules\Pages\Models\Attachment;
 use App\Modules\Pages\Models\Label;
 use App\Modules\Pages\Models\Page;
@@ -20,6 +21,7 @@ use App\Modules\Pages\Services\AttachmentService;
 use App\Modules\Pages\Services\PageService;
 use App\Modules\Pages\Services\PageTree;
 use App\Modules\Pages\Sidebar\PageTreeSection;
+use App\Modules\Pages\Support\CurrentPage;
 use App\Modules\Spaces\Contracts\CurrentSpace;
 use App\Modules\Spaces\Contracts\SpaceAccess;
 use App\Modules\Spaces\Enums\SpaceRole;
@@ -44,7 +46,7 @@ class PagesServiceProvider extends ServiceProvider
     {
         $sidebar->add($this->app->make(PageTreeSection::class));
         $this->app->make(CurrentSpace::class)->resolveUsing(
-            fn (Request $request) => $request->route('page') instanceof Page ? $request->route('page')->space : null,
+            fn (Request $request) => CurrentPage::from($request)?->space,
         );
         $this->registerMenus($menus);
 
@@ -52,6 +54,17 @@ class PagesServiceProvider extends ServiceProvider
         Gate::policy(Page::class, PagePolicy::class);
 
         Route::middleware(['web', 'auth', 'account'])->group(__DIR__.'/routes.php');
+
+        // Readable page URLs have no fixed prefix, so they are registered after
+        // all other routes (Filament, other modules); reserved space slugs are
+        // excluded by the constraint.
+        $this->app->booted(function () {
+            Route::middleware(['web', 'auth', 'account'])
+                ->get('/{spaceSlug}/{pageSlug}', [PageController::class, 'view'])
+                ->where('spaceSlug', Space::routePattern())
+                ->where('pageSlug', '(?:[a-z0-9-]*-)?\d+')
+                ->name('pages.view');
+        });
 
         // Files are not covered by the database cascade.
         Event::listen(SpaceDeleting::class, function (SpaceDeleting $event) {

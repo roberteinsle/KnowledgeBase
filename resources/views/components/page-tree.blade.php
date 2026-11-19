@@ -4,7 +4,7 @@
         @php($isCurrent = $node['id'] === $currentPageId)
         @php($hasChildren = ! empty($node['children']))
         @php($open = $hasChildren && \App\Support\Tree::contains($node['children'], $currentPageId))
-        <li role="treeitem" data-page-id="{{ $node['id'] }}" data-favorite="{{ in_array($node['id'], $favorites, true) ? '1' : '0' }}"
+        <li role="treeitem" data-page-id="{{ $node['id'] }}" data-url="{{ \App\Modules\Pages\Support\PageUrl::to($space->slug, $node['id'], $node['title']) }}" data-favorite="{{ in_array($node['id'], $favorites, true) ? '1' : '0' }}"
             @if ($hasChildren) aria-expanded="{{ $open ? 'true' : 'false' }}" @endif @if ($isCurrent) aria-current="page" @endif>
             <div data-tree-row @if ($canReorder) draggable="true" @endif
                  @class([
@@ -22,7 +22,7 @@
                     <span class="grid size-5 shrink-0 place-items-center" aria-hidden="true"><span class="size-1 rounded-full bg-slate-400"></span></span>
                 @endif
                 <x-kb-icon name="document" class="size-4 shrink-0 text-slate-400" />
-                <a href="{{ route('pages.show', $node['id']) }}" class="min-w-0 flex-1 truncate" draggable="false">{{ $node['title'] }}</a>
+                <a href="{{ \App\Modules\Pages\Support\PageUrl::to($space->slug, $node['id'], $node['title']) }}" class="min-w-0 flex-1 truncate" draggable="false">{{ $node['title'] }}</a>
                 <span class="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100">
                     <button type="button" data-page-menu class="grid size-6 place-items-center rounded text-slate-500 hover:bg-slate-200"
                             aria-haspopup="menu" title="{{ __('Page actions') }}">

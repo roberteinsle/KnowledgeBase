@@ -22,6 +22,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "handbuch"
 DEFAULT_OUT = ROOT / "build" / "wiki"
 
+# Sidebar order; pages not listed follow alphabetically.
+ORDER = ["Home", "Sign-in", "Pages", "Import-and-Export", "Search", "Spaces-Groups-and-Permissions", "Administration", "Operations"]
+
 # [Text](Seite.md) or [Text](Seite.md#anker) -> [Text](Seite) / [Text](Seite#anker)
 LINK = re.compile(r"\]\((?!https?://|mailto:|#)([^)\s]+?)\.md(#[^)\s]*)?\)")
 
@@ -46,8 +49,9 @@ def build(out: Path) -> list[Path]:
             shutil.rmtree(item) if item.is_dir() else item.unlink()
     out.mkdir(parents=True, exist_ok=True)
 
-    pages = sorted(SOURCE.glob("*.md"), key=lambda p: (p.stem != "Home", p.stem.lower()))
-    sidebar = ["**Handbuch**", ""]
+    order = {name: i for i, name in enumerate(ORDER)}
+    pages = sorted(SOURCE.glob("*.md"), key=lambda p: (order.get(p.stem, len(ORDER)), p.stem.lower()))
+    sidebar = ["**Manual**", ""]
 
     for page in pages:
         text = page.read_text(encoding="utf-8")
@@ -56,7 +60,7 @@ def build(out: Path) -> list[Path]:
 
     (out / "_Sidebar.md").write_text("\n".join(sidebar) + "\n", encoding="utf-8")
     (out / "_Footer.md").write_text(
-        "_Automatisch erzeugt aus `handbuch/` – Änderungen bitte dort vornehmen._\n", encoding="utf-8"
+        "_Generated from `handbuch/` in the repository – please edit it there, not here._\n", encoding="utf-8"
     )
     return pages
 

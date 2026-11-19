@@ -49,7 +49,7 @@ class ImportController
             : $import->importPaste($space, $parent, $data['title'] ?? null, (string) $data['markdown'], $request->user());
 
         $redirect = $result->firstPage !== null && $result->pages === 1
-            ? redirect()->route('pages.show', $result->firstPage)
+            ? redirect()->to($result->firstPage->url())
             : redirect()->route('spaces.show', $space);
 
         return $redirect

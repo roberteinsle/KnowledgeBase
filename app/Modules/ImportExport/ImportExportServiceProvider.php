@@ -7,6 +7,7 @@ use App\Core\ImportExport\ImportRegistry;
 use App\Core\Navigation\MenuItem;
 use App\Core\Navigation\MenuRegistry;
 use App\Models\User;
+use App\Modules\ImportExport\Exporters\HtmlPageExporter;
 use App\Modules\ImportExport\Exporters\MarkdownPageExporter;
 use App\Modules\ImportExport\Exporters\PageTreeZipExporter;
 use App\Modules\ImportExport\Exporters\SpaceZipExporter;
@@ -28,6 +29,7 @@ class ImportExportServiceProvider extends ServiceProvider
         $importers->add($this->app->make(ZipImporter::class));
 
         $exporters->add($this->app->make(MarkdownPageExporter::class));
+        $exporters->add($this->app->make(HtmlPageExporter::class));
         $exporters->add($this->app->make(PageTreeZipExporter::class));
         $exporters->add($this->app->make(SpaceZipExporter::class));
 

@@ -29,7 +29,7 @@ class TrashController
 
         $pages->restore($page, $request->user());
 
-        return redirect()->route('pages.show', $page)->with('status', __('Page restored.'));
+        return redirect()->to($page->url())->with('status', __('Page restored.'));
     }
 
     public function destroy(Request $request, Page $page, PageService $pages): RedirectResponse

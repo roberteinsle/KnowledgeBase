@@ -23,12 +23,29 @@ class Space extends Model
 {
     protected $fillable = ['name', 'slug', 'description', 'icon'];
 
+    /**
+     * Page URLs are /<space-slug>/<title>-<id>, so a space slug must never be a
+     * first path segment the system uses itself (including former German paths).
+     */
+    public const RESERVED_SLUGS = [
+        'account', 'admin', 'api', 'assets', 'attachments', 'build', 'confirm', 'css', 'docs', 'filament', 'fonts',
+        'help', 'js', 'labels', 'livewire', 'locale', 'login', 'logout', 'new', 'pages', 'passkeys', 'search',
+        'spaces', 'storage', 'trash', 'up', 'user', 'vendor',
+        'abmelden', 'anhaenge', 'anmelden', 'bereiche', 'bestaetigen', 'konto', 'papierkorb', 'seiten', 'sprache', 'suche',
+    ];
+
+    /** Route constraint for a space slug in page URLs (excludes the reserved words). */
+    public static function routePattern(): string
+    {
+        return '(?!(?:'.implode('|', self::RESERVED_SLUGS).')$)[a-z0-9]+(?:-[a-z0-9]+)*';
+    }
+
     public function hasImage(): bool
     {
         return $this->icon_path !== null && $this->icon_path !== '';
     }
 
-    /** Two letters for the fallback badge, e.g. "Liedelt Immo" → "LI". */
+    /** Two letters for the fallback badge, e.g. "Human Resources" → "HR". */
     public function initials(): string
     {
         $words = preg_split('/[\s\-_]+/u', trim($this->name), -1, PREG_SPLIT_NO_EMPTY) ?: ['?'];

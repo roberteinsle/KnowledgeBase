@@ -5,7 +5,7 @@
     @else
         <ul class="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
             @foreach ($pages as $page)
-                <li><a href="{{ route('pages.show', $page) }}" class="block px-4 py-3 hover:bg-slate-50"><span class="font-medium">{{ $page->title }}</span><span class="block text-xs text-slate-500">{{ $page->space->name }}</span></a></li>
+                <li><a href="{{ $page->url() }}" class="block px-4 py-3 hover:bg-slate-50"><span class="font-medium">{{ $page->title }}</span><span class="block text-xs text-slate-500">{{ $page->space->name }}</span></a></li>
             @endforeach
         </ul>
         <div class="mt-4">{{ $pages->links() }}</div>

@@ -3,7 +3,7 @@
         <a href="{{ route('spaces.show', $space) }}" class="hover:text-indigo-700">{{ $space->name }}</a>
         @foreach ($ancestors as $ancestor)
             <x-kb-icon name="chevron-right" class="size-3.5" />
-            <a href="{{ route('pages.show', $ancestor) }}" class="hover:text-indigo-700">{{ $ancestor->title }}</a>
+            <a href="{{ \App\Modules\Pages\Support\PageUrl::to($space->slug, $ancestor->id, $ancestor->title) }}" class="hover:text-indigo-700">{{ $ancestor->title }}</a>
         @endforeach
     </nav>
 
@@ -27,7 +27,7 @@
                         @if ($item->danger) <div class="my-1 border-t border-slate-100"></div> @endif
                         @if ($item->kind === \App\Core\Navigation\MenuItem::COPY)
                             <button type="button" role="menuitem" class="{{ $classes }}" x-data="{ done: false }"
-                                    @click="navigator.clipboard?.writeText(@js(url($url))).then(() => done = true)">
+                                    @click="navigator.clipboard?.writeText(@js($page->url())).then(() => done = true)">
                                 <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" />
                                 <span x-text="done ? @js(__('Link copied')) : @js(__($item->label))">{{ __($item->label) }}</span>
                             </button>
@@ -65,7 +65,8 @@
         </ul>
     @endif
 
-    <article class="kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
+    <div class="flex gap-10">
+    <article class="min-w-0 flex-1 kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
         @if (trim($page->content) === '')
             <p class="text-slate-500">{{ __('This page is empty.') }}</p>
         @else
@@ -74,12 +75,25 @@
         @endif
     </article>
 
+    {{-- "On this page": headings H2/H3, only on wide screens and for longer pages --}}
+    @if (count($outline) >= 3)
+        <nav class="sticky top-20 hidden max-h-[calc(100vh-6rem)] w-56 shrink-0 self-start overflow-y-auto text-sm xl:block" aria-label="{{ __('On this page') }}">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('On this page') }}</p>
+            <ul class="space-y-1 border-l border-slate-200">
+                @foreach ($outline as $item)
+                    <li><a href="#{{ $item['id'] }}" @class(['-ml-px block border-l border-transparent py-0.5 text-slate-600 hover:border-slate-400 hover:text-slate-900', 'pl-3' => $item['level'] === 2, 'pl-6' => $item['level'] === 3])>{{ $item['text'] }}</a></li>
+                @endforeach
+            </ul>
+        </nav>
+    @endif
+    </div>
+
     @if ($children->isNotEmpty())
         <section class="mt-10">
             <h2 class="mb-3 text-lg font-semibold">{{ __('Sub-pages') }}</h2>
             <ul class="grid gap-2 sm:grid-cols-2">
                 @foreach ($children as $child)
-                    <li><a href="{{ route('pages.show', $child) }}" class="card flex items-center gap-2 py-3 hover:border-indigo-300"><x-kb-icon name="document" class="size-4 text-slate-400" /> {{ $child->title }}</a></li>
+                    <li><a href="{{ \App\Modules\Pages\Support\PageUrl::to($space->slug, $child->id, $child->title) }}" class="card flex items-center gap-2 py-3 hover:border-indigo-300"><x-kb-icon name="document" class="size-4 text-slate-400" /> {{ $child->title }}</a></li>
                 @endforeach
             </ul>
         </section>

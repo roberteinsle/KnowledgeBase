@@ -14,7 +14,7 @@
                 @endif
             </p>
             <div class="flex gap-2">
-                <a href="{{ $isNew ? ($parent ? route('pages.show', $parent) : route('spaces.show', $space)) : route('pages.show', $page) }}" class="btn-ghost">{{ __('Cancel') }}</a>
+                <a href="{{ $isNew ? ($parent ? $parent->url() : route('spaces.show', $space)) : $page->url() }}" class="btn-ghost">{{ __('Cancel') }}</a>
                 <button type="submit" class="btn-primary">{{ __('Save') }}</button>
             </div>
         </div>
@@ -36,13 +36,14 @@
 
         <div class="kb-editor overflow-hidden rounded-lg border border-slate-300 bg-white" data-editor
              data-placeholder="{{ __('Start writing … Markdown shortcuts like # or - work.') }}"
-             data-label-rich="{{ __('Editor') }}" data-label-source="{{ __('Markdown') }}">
+             data-label-rich="{{ __('Editor') }}" data-label-source="{{ __('Markdown') }}"
+             data-preview-url="{{ route('pages.preview') }}" data-preview-empty="{{ __('Nothing to preview yet.') }}">
             <div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-1" data-editor-toolbar hidden>
                 @foreach ([
                     ['bold', 'B', __('Bold')], ['italic', 'I', __('Italic')], ['strike', 'S', __('Strikethrough')], ['code', '</>', __('Code')],
                     ['h2', 'H2', __('Heading')], ['h3', 'H3', __('Subheading')], ['bulletList', '•', __('Bullet list')], ['orderedList', '1.', __('Numbered list')],
                     ['taskList', '☑', __('Task list')], ['blockquote', '❝', __('Quote')], ['codeBlock', '{ }', __('Code block')], ['table', '▦', __('Table')],
-                    ['link', '🔗', __('Link')], ['hr', '—', __('Divider')],
+                    ['link', '🔗', __('Link')], ['hr', '—', __('Divider')], ['toc', '☰', __('Table of contents')],
                 ] as [$cmd, $text, $title])
                     <button type="button" data-cmd="{{ $cmd }}" title="{{ $title }}" aria-label="{{ $title }}" class="min-w-8 rounded px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-200">{{ $text }}</button>
                 @endforeach
@@ -50,10 +51,15 @@
                 <button type="button" data-mode-toggle class="rounded px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200">{{ __('Markdown') }}</button>
             </div>
             <div data-editor-mount hidden></div>
-            {{-- Without JavaScript this plain Markdown field is the editor. --}}
-            <label for="content" class="sr-only">{{ __('Content (Markdown)') }}</label>
-            <textarea id="content" name="content" rows="24" maxlength="1000000" data-editor-source
-                      class="block w-full border-0 px-4 py-3 font-mono text-sm focus:ring-0 focus:outline-none">{{ old('content', $page?->content) }}</textarea>
+            <div class="lg:flex" data-source-pane>
+                {{-- Without JavaScript this plain Markdown field is the editor. --}}
+                <label for="content" class="sr-only">{{ __('Content (Markdown)') }}</label>
+                <textarea id="content" name="content" rows="24" maxlength="1000000" data-editor-source
+                          class="block min-h-[24rem] w-full border-0 px-4 py-3 font-mono text-sm focus:ring-0 focus:outline-none lg:w-1/2">{{ old('content', $page?->content) }}</textarea>
+                {{-- Live preview next to the Markdown source (filled by resources/js/editor.js) --}}
+                <section data-preview hidden aria-live="polite" aria-label="{{ __('Preview') }}"
+                         class="kb-prose prose prose-slate max-w-none border-t border-slate-200 bg-slate-50/50 px-4 py-3 lg:w-1/2 lg:border-l lg:border-t-0"></section>
+            </div>
         </div>
     </form>
 </x-layouts.app>

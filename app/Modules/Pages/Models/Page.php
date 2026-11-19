@@ -3,6 +3,7 @@
 namespace App\Modules\Pages\Models;
 
 use App\Models\User;
+use App\Modules\Pages\Support\PageUrl;
 use App\Modules\Spaces\Models\Space;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,12 @@ class Page extends Model
     protected $hidden = ['search_vector'];
 
     protected $attributes = ['content' => '', 'position' => 0, 'version' => 1];
+
+    /** Readable URL /<space>/<title>-<id>; loads the space if needed. */
+    public function url(): string
+    {
+        return PageUrl::to($this->space->slug, $this->id, $this->title);
+    }
 
     /** @return BelongsTo<Space, $this> */
     public function space(): BelongsTo

@@ -16,6 +16,12 @@
 .kb-prose :is(h1, h2, h3, h4):hover .heading-anchor { @apply opacity-100; }
 .kb-prose li:has(> input[type='checkbox']) { @apply list-none -ml-5; }
 
+/* Table of contents ([TOC]) */
+.kb-prose ul.table-of-contents { @apply my-6 list-none rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-sm; }
+.kb-prose ul.table-of-contents ul { @apply my-1 list-none pl-4; }
+.kb-prose ul.table-of-contents li { @apply my-1 pl-0; }
+.kb-prose ul.table-of-contents a { @apply text-slate-700 no-underline hover:text-indigo-700 hover:underline; }
+
 /* TipTap editor */
 .kb-editor .ProseMirror { @apply min-h-[24rem] px-4 py-3 outline-none; }
 .kb-editor .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); @apply pointer-events-none float-left h-0 text-slate-400; }

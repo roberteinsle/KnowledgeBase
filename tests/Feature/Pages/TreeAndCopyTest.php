@@ -112,7 +112,7 @@ it('toggles favorites and lists them on the home page', function () {
 
     $this->actingAs($this->editor)->postJson(route('pages.favorite', $page))->assertJson(['favorite' => true]);
     $this->actingAs($this->editor)->get('/')->assertSee(__('Favorites'))->assertSee('Lieblingsseite');
-    $this->actingAs($this->editor)->get(route('pages.show', $page))->assertSee(__('Remove from favorites'));
+    $this->actingAs($this->editor)->get($page->url())->assertSee(__('Remove from favorites'));
 
     $this->actingAs($this->editor)->postJson(route('pages.favorite', $page))->assertJson(['favorite' => false]);
     $this->actingAs(member())->postJson(route('pages.favorite', $page))->assertForbidden();

@@ -77,6 +77,7 @@ class SpaceResource extends Resource
                     ->helperText(__('PNG, JPG, WebP or GIF, at most 1 MB. Shown square.')),
                 TextInput::make('slug')->label(__('URL name'))->maxLength(100)
                     ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
+                    ->notIn(Space::RESERVED_SLUGS)
                     ->unique(ignoreRecord: true)
                     ->helperText(__('Lower case letters, digits and hyphens. Left empty, it is derived from the name.')),
                 Textarea::make('description')->label(__('Description'))->maxLength(2000)->rows(3)->columnSpanFull(),

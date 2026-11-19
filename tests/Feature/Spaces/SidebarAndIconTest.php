@@ -41,12 +41,12 @@ it('shows editing actions in the tree only to editors', function () {
     $space = space([[$reader, SpaceRole::Reader], [$editor, SpaceRole::Editor]]);
     $page = page($space);
 
-    $this->actingAs($reader)->get(route('pages.show', $page))
+    $this->actingAs($reader)->get($page->url())
         ->assertDontSee('data-place-url', false)
         ->assertDontSee(route('pages.duplicate', '__PAGE__'), false)
         ->assertSee(__('Copy link'));
 
-    $this->actingAs($editor)->get(route('pages.show', $page))
+    $this->actingAs($editor)->get($page->url())
         ->assertSee('data-place-url', false)
         ->assertSee(route('pages.duplicate', '__PAGE__'), false)
         ->assertDontSee(__('Move to trash'));
@@ -95,9 +95,9 @@ it('removes the old icon file when it is replaced or the space is deleted', func
 it('falls back to emoji and initials', function () {
     $user = member();
     $emoji = space([[$user, SpaceRole::Reader]], ['name' => 'Mit Emoji', 'icon' => '🚀']);
-    space([[$user, SpaceRole::Reader]], ['name' => 'Liedelt Immo']);
+    space([[$user, SpaceRole::Reader]], ['name' => 'Human Resources']);
 
-    $this->actingAs($user)->get(route('spaces.show', $emoji))->assertSee('🚀')->assertSee('>LI<', false);
+    $this->actingAs($user)->get(route('spaces.show', $emoji))->assertSee('🚀')->assertSee('>HR<', false);
 });
 
 it('restricts the search to one space', function () {

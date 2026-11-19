@@ -23,7 +23,7 @@ class PageCopyController
 
         $copy = $pages->duplicate($page, $request->user());
 
-        return redirect()->route('pages.show', $copy)->with('status', __('Page duplicated.'));
+        return redirect()->to($copy->url())->with('status', __('Page duplicated.'));
     }
 
     /** "Copy to space": choose a space (and parent) the user may contribute to. */
@@ -54,6 +54,6 @@ class PageCopyController
 
         $copy = $pages->duplicate($page, $request->user(), $space, $parent);
 
-        return redirect()->route('pages.show', $copy)->with('status', __('Page copied to :space.', ['space' => $space->name]));
+        return redirect()->to($copy->url())->with('status', __('Page copied to :space.', ['space' => $space->name]));
     }
 }

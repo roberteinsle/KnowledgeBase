@@ -60,7 +60,7 @@ it('restores an old version as a new version', function () {
     $page = page($this->space, ['title' => 'A', 'content' => 'eins']);
     $this->actingAs($this->editor)->put(route('pages.update', $page), ['title' => 'B', 'content' => 'zwei', 'version' => 1]);
 
-    $this->actingAs($this->editor)->post(route('pages.versions.restore', [$page, 1]))->assertRedirect(route('pages.show', $page));
+    $this->actingAs($this->editor)->post(route('pages.versions.restore', [$page, 1]))->assertRedirect($page->url());
 
     $page->refresh();
     expect([$page->title, $page->content, $page->version])->toBe(['A', 'eins', 3]);
@@ -78,8 +78,8 @@ it('nests sub-pages and shows breadcrumbs', function () {
     $parent = page($this->space, ['title' => 'Eltern']);
     $child = page($this->space, ['title' => 'Kind'], $parent);
 
-    $this->actingAs($this->editor)->get(route('pages.show', $child))->assertOk()->assertSeeInOrder(['Eltern', 'Kind']);
-    $this->actingAs($this->editor)->get(route('pages.show', $parent))->assertSee(__('Sub-pages'));
+    $this->actingAs($this->editor)->get($child->url())->assertOk()->assertSeeInOrder(['Eltern', 'Kind']);
+    $this->actingAs($this->editor)->get($parent->url())->assertSee(__('Sub-pages'));
 });
 
 it('moves pages but never below themselves', function () {
@@ -103,10 +103,10 @@ it('moves pages with sub-pages to the trash and restores them together', functio
 
     $this->actingAs($this->editor)->delete(route('pages.destroy', $parent))->assertRedirect(route('spaces.show', $this->space));
     expect(Page::count())->toBe(0);
-    $this->actingAs($this->editor)->get(route('pages.show', $child))->assertNotFound();
+    $this->actingAs($this->editor)->get($child->url())->assertNotFound();
 
     $this->actingAs($this->editor)->get(route('trash.index', $this->space))->assertSee('Eltern');
-    $this->actingAs($this->editor)->post(route('trash.restore', $parent))->assertRedirect(route('pages.show', $parent));
+    $this->actingAs($this->editor)->post(route('trash.restore', $parent))->assertRedirect($parent->url());
     expect(Page::count())->toBe(2);
 });
 
@@ -123,7 +123,7 @@ it('deletes pages permanently only from the trash', function () {
 it('escapes HTML and drops unsafe links when rendering Markdown', function () {
     $page = page($this->space, ['content' => "<script>alert(1)</script>\n\n[klick](javascript:alert(1))\n\n<img src=x onerror=alert(1)>\n\n**fett**"]);
 
-    $response = $this->actingAs($this->editor)->get(route('pages.show', $page))->assertOk();
+    $response = $this->actingAs($this->editor)->get($page->url())->assertOk();
 
     $html = $response->getContent();
     expect($html)->not->toContain('<script>alert(1)</script>')
@@ -136,7 +136,7 @@ it('escapes HTML and drops unsafe links when rendering Markdown', function () {
 it('escapes titles and labels', function () {
     $page = page($this->space, ['title' => '<b>Titel</b>']);
 
-    $this->actingAs($this->editor)->get(route('pages.show', $page))
+    $this->actingAs($this->editor)->get($page->url())
         ->assertDontSee('<b>Titel</b>', false)
         ->assertSee('&lt;b&gt;Titel&lt;/b&gt;', false);
 });

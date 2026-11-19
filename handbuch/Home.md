@@ -1,40 +1,44 @@
-# Knowledgebase – Handbuch
+# Knowledgebase
 
-Knowledgebase ist eine Wissensdatenbank für Teams: Dokumentation in **Bereichen** mit verschachtelten **Seiten**, Versionsverlauf, Labels, Anhängen, Volltextsuche und Import/Export von **Markdown**.
+Knowledgebase is a self-hosted knowledge base for teams: documentation organised in **spaces** with nested **pages**, version history, labels, attachments, full-text search and lossless **Markdown** import and export.
 
-## Für Benutzer
+## For users
 
-- [Anmeldung](Anmeldung.md) – Passkey, Anmeldelink per E-Mail, Zwei-Faktor-Authentifizierung
-- [Seiten](Seiten.md) – schreiben, verschachteln, Versionen, Labels, Anhänge, Papierkorb
-- [Import und Export](Import-und-Export.md) – Markdown-Dateien, ZIP-Archive (Obsidian, Notion), Einfügen per Copy & Paste, Backups
-- [Suche](Suche.md)
+- [Sign-in](Sign-in.md) – passkeys, e-mail sign-in links, authenticator app
+- [Pages](Pages.md) – writing, page tree, drag & drop, table of contents, versions, labels, attachments, trash
+- [Import and Export](Import-and-Export.md) – Markdown files, ZIP archives (Obsidian, Notion), copy & paste, HTML, backups
+- [Search](Search.md)
 
-## Für Administratoren und Betreiber
+## For administrators and operators
 
-- [Bereiche, Gruppen und Rechte](Bereiche-Gruppen-und-Rechte.md)
-- [Administration](Administration.md) – Benutzer, Gruppen, Bereiche, Labels, Protokoll, Einstellungen
-- [Betrieb](Betrieb.md) – Installation, Umgebungsvariablen, Cloudflare Access, Updates, Backup
+- [Spaces, Groups and Permissions](Spaces-Groups-and-Permissions.md)
+- [Administration](Administration.md) – users, groups, spaces, labels, activity log, settings
+- [Operations](Operations.md) – installation, environment variables, Cloudflare Access, updates, backup
 
-## Aufbau
+## Structure
 
-| Ebene | Bedeutung |
+| Level | Meaning |
 |---|---|
-| **Workspace** | Die ganze Installation mit Name, Standardsprache und Sicherheitseinstellungen. |
-| **Bereich** (Space) | Ein abgegrenzter Teil für ein Team, ein Projekt oder eine Abteilung – mit eigenen Rechten. |
-| **Seite** (Page) | Ein Dokument in einem Bereich. Seiten können Unterseiten haben. |
-| **Gruppe** | Mehrere Benutzer, denen gemeinsam Rechte gegeben werden. Alle Benutzer gehören automatisch zur Gruppe **Everyone**. |
+| **Workspace** | The whole installation: name, default language, security settings. |
+| **Space** | A section for a team, a project or a department – with its own permissions and icon. |
+| **Page** | A document in a space. Pages can have sub-pages. |
+| **Group** | Several users who get permissions together. Every user automatically belongs to the group **Everyone**. |
 
 ## Navigation
 
-- **Kopfzeile:** Logo und Startseite links, Suche in der Mitte (Taste <kbd>/</kbd>), Konto rechts.
-- **Linke Leiste:** oben der **Bereichswechsler** (mit Suchfeld), darunter *Überblick*, *Suche* (nur in diesem Bereich), *Bereichseinstellungen* (nur Administratoren) und *Neue Seite*. Es folgt der **Seitenbaum** des Bereichs. Ohne geöffneten Bereich zeigt die Leiste den zuletzt besuchten.
-- **Handy:** untere Leiste mit Start, Bereiche, Suche und Konto; die linke Leiste öffnet sich über **Bereiche und Seiten**.
-- **Startseite und Überblick eines Bereichs:** Reiter *Zuletzt geändert*, *Favoriten* und *Von mir erstellt*.
+- **Header:** logo and *Home* on the left, search in the middle (key <kbd>/</kbd>), account menu on the right.
+- **Left sidebar:** the **space switcher** at the top (with a search field), below it *Overview*, *Search* (this space only), *Space settings* (administrators) and *New page*, followed by the **page tree** of the space. Outside a space the sidebar shows the space visited last.
+- **Phone:** a tab bar at the bottom (Home, Spaces, Search, Account); the sidebar opens via **Spaces and pages**.
+- **Home page and space overview:** tabs *Recently updated*, *Favorites* and *Created by me*.
 
-## Sprachen
+## Addresses
 
-Die Oberfläche gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch. Jeder Benutzer wählt seine Sprache unter **Konto**; ohne Auswahl gilt die Sprache des Browsers, sonst die Standardsprache des Workspaces.
+All addresses are English, whatever language the interface uses. A page has a readable address made of space, title and number, e.g. `/handbook/onboarding-guide-12`. If the title changes or the page moves to another space, old addresses forward to the current one. `/pages/12` is the permanent link of the same page.
 
-## Geplant
+## Languages
 
-Datenbanken (Bases), Kommentare und ein MCP-Server für KI-Assistenten (z. B. claude.ai) folgen in späteren Versionen.
+The interface is available in German, English, French, Italian and Spanish. Every user chooses a language under **Account**; without a choice the browser language is used, otherwise the default language of the workspace.
+
+## Planned
+
+Databases (Bases), comments and an MCP server for AI assistants (e.g. claude.ai) follow in later versions.

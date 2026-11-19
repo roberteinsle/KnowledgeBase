@@ -46,7 +46,7 @@ class AttachmentSearchProvider implements SearchProvider
             ->get()
             ->map(fn (Attachment $a) => new SearchResult(
                 title: $a->original_name,
-                url: route('pages.show', $a->page_id).'#attachments',
+                url: route('pages.show', $a->page_id).'#attachments', // permalink, redirect keeps the anchor
                 context: $a->page->title,
                 excerpt: (string) $a->getAttribute('excerpt'),
                 rank: (float) $a->getAttribute('rank'),

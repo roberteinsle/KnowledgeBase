@@ -7,6 +7,7 @@ use App\Core\Search\SearchQuery;
 use App\Core\Search\SearchResult;
 use App\Models\User;
 use App\Modules\Pages\Models\Page;
+use App\Modules\Pages\Support\PageUrl;
 use App\Modules\Spaces\Contracts\SpaceAccess;
 
 class PageSearchProvider implements SearchProvider
@@ -47,7 +48,7 @@ class PageSearchProvider implements SearchProvider
             ->get()
             ->map(fn (Page $page) => new SearchResult(
                 title: $page->title,
-                url: route('pages.show', $page),
+                url: PageUrl::to($page->space->slug, $page->id, $page->title),
                 context: $page->space->name,
                 excerpt: (string) $page->getAttribute('excerpt'),
                 rank: (float) $page->getAttribute('rank'),

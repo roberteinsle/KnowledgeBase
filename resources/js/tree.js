@@ -74,6 +74,7 @@ function initMenu(tree) {
         wrapper.innerHTML = html.trim()
         menu = wrapper.firstElementChild
         menu.dataset.for = item.dataset.pageId
+        menu.dataset.pageUrl = new URL(item.dataset.url, window.location.origin).href
 
         if (item.dataset.favorite === '1') {
             menu.querySelectorAll('[data-active-label]').forEach((el) => {
@@ -93,7 +94,8 @@ function initMenu(tree) {
         if (!menu) return
         const copy = event.target.closest('[data-copy-url]')
         if (copy && menu.contains(copy)) {
-            navigator.clipboard?.writeText(copy.dataset.copyUrl).then(() => {
+            // The readable URL of the page; the permalink from the template is the fallback.
+            navigator.clipboard?.writeText(menu.dataset.pageUrl || copy.dataset.copyUrl).then(() => {
                 copy.lastChild.textContent = ` ${tree.dataset.copiedLabel}`
                 setTimeout(close, 800)
             })

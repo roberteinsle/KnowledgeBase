@@ -14,7 +14,7 @@
         </div>
         <div class="flex gap-2">
             <button type="submit" class="btn-primary">{{ __('Move') }}</button>
-            <a href="{{ route('pages.show', $page) }}" class="btn-ghost">{{ __('Cancel') }}</a>
+            <a href="{{ $page->url() }}" class="btn-ghost">{{ __('Cancel') }}</a>
         </div>
     </form>
 </x-layouts.app>

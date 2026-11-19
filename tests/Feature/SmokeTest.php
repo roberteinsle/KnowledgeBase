@@ -33,7 +33,7 @@ it('renders every page view of a space', function () {
 
     foreach ([
         route('spaces.show', $space), route('pages.create', $space), route('trash.index', $space), route('import.create', $space),
-        route('pages.show', $page), route('pages.edit', $page), route('pages.move', $page), route('pages.copy', $page),
+        $page->url(), route('pages.edit', $page), route('pages.move', $page), route('pages.copy', $page),
         route('pages.versions', $page), route('pages.versions.show', [$page, 1]),
     ] as $url) {
         $this->actingAs($admin)->get($url)->assertOk();

@@ -51,7 +51,7 @@ class PageVersionController
 
         $pages->restoreVersion($page, $this->find($page, $version), $request->user());
 
-        return redirect()->route('pages.show', $page)->with('status', __('Version :version restored.', ['version' => $version]));
+        return redirect()->to($page->url())->with('status', __('Version :version restored.', ['version' => $version]));
     }
 
     private function find(Page $page, int $version): PageVersion

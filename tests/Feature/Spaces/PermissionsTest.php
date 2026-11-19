@@ -9,7 +9,7 @@ use App\Modules\Spaces\Enums\SpaceRole;
  */
 dataset('page actions', [
     'view space' => [fn ($s, $p) => ['get', route('spaces.show', $s)], [403, 200, 200, 200, 200]],
-    'view page' => [fn ($s, $p) => ['get', route('pages.show', $p)], [403, 200, 200, 200, 200]],
+    'view page' => [fn ($s, $p) => ['get', $p->url()], [403, 200, 200, 200, 200]],
     'version history' => [fn ($s, $p) => ['get', route('pages.versions', $p)], [403, 200, 200, 200, 200]],
     'export page' => [fn ($s, $p) => ['get', route('export.page', [$p, 'page-md'])], [403, 200, 200, 200, 200]],
     'export space' => [fn ($s, $p) => ['get', route('export.space', [$s, 'space-zip'])], [403, 200, 200, 200, 200]],
@@ -55,7 +55,7 @@ it('grants access to everyone through the Everyone group', function () {
     $space = space([[Group::everyone(), SpaceRole::Reader]]);
     $page = page($space);
 
-    $this->actingAs(member())->get(route('pages.show', $page))->assertOk();
+    $this->actingAs(member())->get($page->url())->assertOk();
     $this->actingAs(member())->get(route('pages.edit', $page))->assertForbidden();
 });
 

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\Pages\Models\Page;
 use App\Modules\Pages\Services\FavoriteService;
 use App\Modules\Pages\Services\PageTree;
+use App\Modules\Pages\Support\CurrentPage;
 use App\Modules\Spaces\Contracts\CurrentSpace;
 use App\Modules\Spaces\Contracts\SpaceAccess;
 use App\Modules\Spaces\Enums\SpaceRole;
@@ -38,7 +39,7 @@ class PageTreeSection implements SidebarSection
             return null;
         }
 
-        $current = request()->route('page');
+        $current = CurrentPage::from(request());
 
         return view('pages.sidebar', [
             'space' => $space,

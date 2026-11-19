@@ -9,6 +9,8 @@ use App\Modules\Pages\Services\LabelNormalizer;
 use App\Modules\Pages\Services\MarkdownRenderer;
 use App\Modules\Pages\Services\PageService;
 use App\Modules\Pages\Services\PageTree;
+use App\Modules\Pages\Support\CurrentPage;
+use App\Modules\Pages\Support\PageUrl;
 use App\Modules\Spaces\Models\Space;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,19 +54,45 @@ class PageController
             LabelNormalizer::normalize($data['labels'] ?? ''),
         );
 
-        return redirect()->route('pages.show', $page)->with('status', __('Page created.'));
+        return redirect()->to($page->url())->with('status', __('Page created.'));
     }
 
-    public function show(Request $request, Page $page, PageTree $tree, MarkdownRenderer $markdown, MenuRegistry $menus, FavoriteService $favorites): View
+    /** /pages/{id}: permanent link, forwards to the readable URL. */
+    public function permalink(Page $page): RedirectResponse
+    {
+        Gate::authorize('view', $page);
+
+        return redirect()->to($page->url());
+    }
+
+    /** /<space>/<title>-<id>; stale space or title parts are corrected by a redirect. */
+    public function view(Request $request, string $spaceSlug, string $pageSlug, PageTree $tree, MarkdownRenderer $markdown, MenuRegistry $menus, FavoriteService $favorites): View|RedirectResponse
+    {
+        $page = Page::query()->with('space')->findOrFail(PageUrl::idFrom($pageSlug));
+        Gate::authorize('view', $page);
+
+        if ($spaceSlug !== $page->space->slug || $pageSlug !== PageUrl::slug($page->id, $page->title)) {
+            return redirect()->to($page->url(), 301);
+        }
+
+        CurrentPage::set($request, $page);
+
+        return $this->show($request, $page, $tree, $markdown, $menus, $favorites);
+    }
+
+    private function show(Request $request, Page $page, PageTree $tree, MarkdownRenderer $markdown, MenuRegistry $menus, FavoriteService $favorites): View
     {
         Gate::authorize('view', $page);
 
         $page->load(['labels', 'attachments', 'editor', 'space']);
 
+        $html = $markdown->toHtml($page->content);
+
         return view('pages.show', [
             'page' => $page,
             'space' => $page->space,
-            'html' => $markdown->toHtml($page->content),
+            'html' => $html,
+            'outline' => $markdown->outline($html),
             'ancestors' => $tree->ancestors($page),
             'children' => $page->children()->get(['id', 'title', 'parent_id']),
             'menu' => $menus->for('page', $request->user(), $page->space),
@@ -98,7 +126,7 @@ class PageController
 
         $pages->update($page, $data['title'], $data['content'] ?? '', $request->user(), LabelNormalizer::normalize($data['labels'] ?? ''));
 
-        return redirect()->route('pages.show', $page)->with('status', __('Page saved.'));
+        return redirect()->to($page->url())->with('status', __('Page saved.'));
     }
 
     public function moveForm(Page $page, PageTree $tree, PageService $pages): View
@@ -125,7 +153,7 @@ class PageController
 
         $pages->move($page, $parent, $request->user());
 
-        return redirect()->route('pages.show', $page)->with('status', __('Page moved.'));
+        return redirect()->to($page->url())->with('status', __('Page moved.'));
     }
 
     public function destroy(Request $request, Page $page, PageService $pages): RedirectResponse
