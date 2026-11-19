@@ -18,6 +18,9 @@ services:
       - APP_LOCALE=${APP_LOCALE:-de}
       - DISPLAY_TIMEZONE=${DISPLAY_TIMEZONE:-Europe/Berlin}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - MCP_REDIRECT_DOMAINS=${MCP_REDIRECT_DOMAINS:-https://claude.ai,https://claude.com,http://localhost}
+      - PASSPORT_PRIVATE_KEY=${PASSPORT_PRIVATE_KEY:-}
+      - PASSPORT_PUBLIC_KEY=${PASSPORT_PUBLIC_KEY:-}
       - LOG_CHANNEL=stderr
       - DB_CONNECTION=pgsql
       - DB_HOST=${DB_HOST}

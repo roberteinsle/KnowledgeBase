@@ -43,7 +43,7 @@ Favorites are personal: every user has their own. They appear on the home page a
 
 ## Creating a page
 
-- In a space: **New page** (main action at the top right) or in the sidebar.
+- In a space: **New page** (main action at the top right, next to **Import Markdown**) or in the sidebar.
 - Sub-page: **+** next to the page in the tree, or **More → New sub-page** on the page.
 
 You need at least the role **Editor** in the space (see [Spaces, Groups and Permissions](Spaces-Groups-and-Permissions.md)).
@@ -56,6 +56,7 @@ The editor shows formatted text, but the page is stored as **Markdown**. This ke
 - Markdown shortcuts work while typing: `# ` for headings, `- ` for lists, `1. ` for numbered lists, `> ` for quotes, ` ``` ` for code.
 - Pasting Markdown text (e.g. from another tool) turns it into formatting directly.
 - Without JavaScript a plain Markdown text field appears.
+- On the page, every code block has a **Copy** button in its top right corner that copies the code to the clipboard.
 
 ### Markdown with live preview
 

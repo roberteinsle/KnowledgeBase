@@ -31,6 +31,7 @@ npm ci
 [ -f .env ] || cp .env.example .env
 grep -q "APP_KEY=base64:" .env || php artisan key:generate
 php artisan migrate --force
+[ -f storage/oauth-private.key ] || php artisan passport:keys --no-interaction
 php artisan storage:link || true
 
 echo ""

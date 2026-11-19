@@ -3,6 +3,7 @@
 namespace App\Modules\Spaces;
 
 use App\Core\Dashboard\DashboardRegistry;
+use App\Core\Mcp\McpToolRegistry;
 use App\Core\Navigation\MenuItem;
 use App\Core\Navigation\MenuRegistry;
 use App\Core\Navigation\NavigationItem;
@@ -12,6 +13,9 @@ use App\Models\User;
 use App\Modules\Spaces\Contracts\CurrentSpace;
 use App\Modules\Spaces\Contracts\SpaceAccess;
 use App\Modules\Spaces\Dashboard\SpacesWidget;
+use App\Modules\Spaces\Mcp\CreateSpaceTool;
+use App\Modules\Spaces\Mcp\ListSpacesTool;
+use App\Modules\Spaces\Mcp\UpdateSpaceTool;
 use App\Modules\Spaces\Models\Space;
 use App\Modules\Spaces\Policies\SpacePolicy;
 use App\Modules\Spaces\Services\CurrentSpaceService;
@@ -35,6 +39,9 @@ class SpacesServiceProvider extends ServiceProvider
     public function boot(NavigationRegistry $navigation, DashboardRegistry $dashboard, SidebarRegistry $sidebar, MenuRegistry $menus): void
     {
         $sidebar->add($this->app->make(SpaceSwitcherSection::class));
+        foreach ([ListSpacesTool::class, CreateSpaceTool::class, UpdateSpaceTool::class] as $tool) {
+            $this->app->make(McpToolRegistry::class)->add($tool);
+        }
         $this->app->make(CurrentSpace::class)->resolveUsing(
             fn (Request $request) => $request->route('space') instanceof Space ? $request->route('space') : null,
         );

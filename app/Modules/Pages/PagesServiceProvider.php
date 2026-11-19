@@ -3,6 +3,7 @@
 namespace App\Modules\Pages;
 
 use App\Core\Dashboard\DashboardRegistry;
+use App\Core\Mcp\McpToolRegistry;
 use App\Core\Navigation\MenuItem;
 use App\Core\Navigation\MenuRegistry;
 use App\Core\Search\SearchRegistry;
@@ -11,6 +12,12 @@ use App\Models\User;
 use App\Modules\Pages\Contracts\PageWriter;
 use App\Modules\Pages\Dashboard\RecentPagesWidget;
 use App\Modules\Pages\Http\Controllers\PageController;
+use App\Modules\Pages\Mcp\CreatePageTool;
+use App\Modules\Pages\Mcp\ListPagesTool;
+use App\Modules\Pages\Mcp\MovePageTool;
+use App\Modules\Pages\Mcp\ReadPageTool;
+use App\Modules\Pages\Mcp\TrashPageTool;
+use App\Modules\Pages\Mcp\UpdatePageTool;
 use App\Modules\Pages\Models\Attachment;
 use App\Modules\Pages\Models\Label;
 use App\Modules\Pages\Models\Page;
@@ -49,6 +56,11 @@ class PagesServiceProvider extends ServiceProvider
             fn (Request $request) => CurrentPage::from($request)?->space,
         );
         $this->registerMenus($menus);
+
+        $tools = $this->app->make(McpToolRegistry::class);
+        foreach ([ListPagesTool::class, ReadPageTool::class, CreatePageTool::class, UpdatePageTool::class, MovePageTool::class, TrashPageTool::class] as $tool) {
+            $tools->add($tool);
+        }
 
         Relation::morphMap(['page' => Page::class, 'attachment' => Attachment::class, 'label' => Label::class]);
         Gate::policy(Page::class, PagePolicy::class);

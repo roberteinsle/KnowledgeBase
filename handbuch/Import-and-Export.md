@@ -4,7 +4,7 @@ Markdown is the exchange format. What has been exported can be imported again wi
 
 ## Importing
 
-In a space: space menu **…** in the sidebar → **Import Markdown**, or on a page **More → Import below this page**. You need the role **Editor**.
+In a space: **Import Markdown** at the top right of the space overview or in the space menu **…** in the sidebar, or on a page **More → Import below this page**. You need the role **Editor**.
 
 Under **Import into** you choose where the new pages go (top level or below an existing page).
 

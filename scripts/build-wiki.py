@@ -23,7 +23,7 @@ SOURCE = ROOT / "handbuch"
 DEFAULT_OUT = ROOT / "build" / "wiki"
 
 # Sidebar order; pages not listed follow alphabetically.
-ORDER = ["Home", "Sign-in", "Account", "Pages", "Import-and-Export", "Search", "Spaces-Groups-and-Permissions", "Administration", "Operations"]
+ORDER = ["Home", "Sign-in", "Account", "Pages", "Import-and-Export", "Search", "MCP", "Spaces-Groups-and-Permissions", "Administration", "Operations"]
 
 # [Text](Seite.md) or [Text](Seite.md#anker) -> [Text](Seite) / [Text](Seite#anker)
 LINK = re.compile(r"\]\((?!https?://|mailto:|#)([^)\s]+?)\.md(#[^)\s]*)?\)")

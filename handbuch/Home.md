@@ -9,6 +9,7 @@ Knowledgebase is a self-hosted knowledge base for teams: documentation organised
 - [Pages](Pages.md) – writing, page tree, drag & drop, table of contents, versions, labels, attachments, trash
 - [Import and Export](Import-and-Export.md) – Markdown files, ZIP archives (Obsidian, Notion), copy & paste, HTML, backups
 - [Search](Search.md)
+- [MCP (AI assistants)](MCP.md) – connect Claude and other AI apps
 
 ## For administrators and operators
 
@@ -42,4 +43,4 @@ The interface is available in German, English, French, Italian and Spanish. Ever
 
 ## Planned
 
-Databases (Bases), comments and an MCP server for AI assistants (e.g. claude.ai) follow in later versions.
+Databases (Bases) and comments follow in later versions.

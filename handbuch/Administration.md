@@ -1,6 +1,6 @@
 # Administration
 
-The administration area is at `/admin` and only available to workspace administrators. Open it via the account menu at the top right → **Administration**.
+The administration area is at `/admin` and only available to workspace administrators. Open it via the account menu at the top right → **Administration**; **Back to the knowledge base** (below *Dashboard* in the navigation) returns to the app.
 
 ## Users
 

@@ -69,7 +69,7 @@
     @endif
 
     <div class="flex gap-10">
-    <article class="min-w-0 flex-1 kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
+    <article data-code-copy data-copy-label="{{ __('Copy') }}" data-copied-label="{{ __('Copied') }}" class="min-w-0 flex-1 kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
         @if (trim($page->content) === '')
             <p class="text-slate-500">{{ __('This page is empty.') }}</p>
         @else

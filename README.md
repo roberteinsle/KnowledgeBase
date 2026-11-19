@@ -13,7 +13,7 @@
 
 ---
 
-Knowledgebase keeps your team's documentation in one place: **spaces** for teams and projects, nested **pages** written in a rich editor that stores plain **Markdown**, version history, full-text search and import from Obsidian, Notion or any Markdown files – on your own server. Sign-in works without passwords, via passkey or e-mail link.
+Knowledgebase keeps your team's documentation in one place: **spaces** for teams and projects, nested **pages** written in a rich editor that stores plain **Markdown**, version history, full-text search, import from Obsidian, Notion or any Markdown files and an MCP server for AI assistants like Claude – on your own server. Sign-in works without passwords, via passkey or e-mail link.
 
 ## Quick start
 
@@ -34,6 +34,7 @@ Updates are a new image tag; the database is migrated automatically on start.
 | [**Version history**](../../wiki/Pages#version-history) | Every change is a version – compare, restore, no silent overwrites |
 | [**Import & export**](../../wiki/Import-and-Export) | Markdown files, ZIP archives (Obsidian, Notion), copy & paste; export as Markdown, HTML or ZIP |
 | [**Search**](../../wiki/Search) | Full-text search over pages and attachments, per space or everywhere |
+| [**MCP**](../../wiki/MCP) | Connect Claude and other AI assistants: search, read, create and update pages with your permissions (OAuth) |
 | [**Sign-in**](../../wiki/Sign-in) | Passkeys, magic links, authenticator app with recovery codes |
 | [**Administration**](../../wiki/Administration) | Users, groups, spaces, labels, activity log, workspace settings |
 

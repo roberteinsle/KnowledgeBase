@@ -4,6 +4,7 @@ use App\Core\CoreServiceProvider;
 use App\Modules\Auth\AuthServiceProvider;
 use App\Modules\Groups\GroupsServiceProvider;
 use App\Modules\ImportExport\ImportExportServiceProvider;
+use App\Modules\Mcp\McpServiceProvider;
 use App\Modules\Pages\PagesServiceProvider;
 use App\Modules\Search\SearchServiceProvider;
 use App\Modules\Spaces\SpacesServiceProvider;
@@ -21,5 +22,6 @@ return [
     PagesServiceProvider::class,
     SearchServiceProvider::class,
     ImportExportServiceProvider::class,
+    McpServiceProvider::class,
     AdminPanelProvider::class,
 ];

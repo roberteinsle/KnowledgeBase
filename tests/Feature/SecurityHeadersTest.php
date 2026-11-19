@@ -37,3 +37,17 @@ it('allows blob workers for uploads but nothing from other origins', function ()
 
     expect($csp)->toContain("worker-src 'self' blob:")->toContain("img-src 'self' data: blob:")->not->toContain('https:');
 });
+
+it('allows the OAuth callback as form target on the consent page only', function () {
+    app()->detectEnvironment(fn () => 'production');
+    $clientId = $this->postJson('/oauth/register', ['client_name' => 'Claude', 'redirect_uris' => ['https://claude.ai/api/mcp/auth_callback']])->json('client_id');
+    $query = http_build_query([
+        'client_id' => $clientId, 'redirect_uri' => 'https://claude.ai/api/mcp/auth_callback', 'response_type' => 'code',
+        'scope' => 'mcp:use', 'state' => 'x', 'code_challenge' => str_repeat('a', 43), 'code_challenge_method' => 'S256',
+    ]);
+
+    $consent = $this->actingAs(member())->get('/oauth/authorize?'.$query)->assertOk();
+    expect($consent->headers->get('Content-Security-Policy'))->toContain("form-action 'self' https://claude.ai;");
+
+    expect($this->get('/account')->headers->get('Content-Security-Policy'))->toContain("form-action 'self';");
+});

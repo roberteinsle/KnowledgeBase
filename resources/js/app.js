@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs'
 import { initPasskeys } from './passkeys'
 import { initPageTrees } from './tree'
+import { initCodeCopy } from './code-copy'
 
 window.Alpine = Alpine
 Alpine.start()
@@ -32,6 +33,7 @@ document.addEventListener('keydown', (event) => {
 
 initPasskeys()
 initPageTrees()
+initCodeCopy()
 
 // The editor bundle is only loaded where it is needed.
 const editorElement = document.querySelector('[data-editor]')

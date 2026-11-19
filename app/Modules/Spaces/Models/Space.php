@@ -29,7 +29,7 @@ class Space extends Model
      */
     public const RESERVED_SLUGS = [
         'account', 'admin', 'api', 'assets', 'attachments', 'avatars', 'build', 'confirm', 'css', 'docs', 'filament', 'fonts',
-        'help', 'js', 'labels', 'livewire', 'locale', 'login', 'logout', 'new', 'pages', 'passkeys', 'search',
+        'help', 'js', 'labels', 'livewire', 'locale', 'login', 'logout', 'mcp', 'new', 'oauth', 'pages', 'passkeys', 'search',
         'spaces', 'storage', 'trash', 'up', 'user', 'vendor',
         'abmelden', 'anhaenge', 'anmelden', 'bereiche', 'bestaetigen', 'konto', 'papierkorb', 'seiten', 'sprache', 'suche',
     ];

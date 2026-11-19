@@ -15,6 +15,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\PasskeyAuthenticatable;
+use Laravel\Passport\Contracts\OAuthenticatable;
+use Laravel\Passport\HasApiTokens;
 
 /**
  * @property int $id
@@ -30,10 +32,10 @@ use Laravel\Passkeys\PasskeyAuthenticatable;
  * @property Carbon|null $last_login_at
  * @property Carbon $created_at
  */
-class User extends Authenticatable implements FilamentUser, HasAvatar, PasskeyUser
+class User extends Authenticatable implements FilamentUser, HasAvatar, OAuthenticatable, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable;
 
     public const ROLE_ADMIN = 'admin';
 

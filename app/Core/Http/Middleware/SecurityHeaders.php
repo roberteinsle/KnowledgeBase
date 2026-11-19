@@ -24,7 +24,7 @@ class SecurityHeaders
             "font-src 'self' data:",
             "connect-src 'self'".(app()->isLocal() ? ' ws: wss: http://localhost:5173 http://127.0.0.1:5173' : ''),
             "frame-ancestors 'none'",
-            "form-action 'self'",
+            "form-action 'self'".$this->oauthCallbackOrigin($request),
             "base-uri 'self'",
             "object-src 'none'",
         ]);
@@ -40,10 +40,34 @@ class SecurityHeaders
         }
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-        if ($request->isSecure()) {
+        if ($request->isSecure() && ! $response->headers->has('Strict-Transport-Security')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
         return $response;
+    }
+
+    /**
+     * On the OAuth consent page the approve/deny forms answer with a redirect
+     * to the client's callback; browsers apply form-action to that redirect.
+     * Passport has validated redirect_uri against the registered client before
+     * the consent form is rendered.
+     */
+    private function oauthCallbackOrigin(Request $request): string
+    {
+        if (! $request->routeIs('passport.authorizations.authorize')) {
+            return '';
+        }
+
+        $uri = (string) $request->query('redirect_uri');
+        $scheme = parse_url($uri, PHP_URL_SCHEME);
+        $host = parse_url($uri, PHP_URL_HOST);
+        $port = parse_url($uri, PHP_URL_PORT);
+
+        if (! in_array($scheme, ['https', 'http'], true) || ! is_string($host) || preg_match('/^[a-z0-9.\-]+$/i', $host) !== 1) {
+            return '';
+        }
+
+        return ' '.$scheme.'://'.$host.($port ? ':'.$port : '');
     }
 }

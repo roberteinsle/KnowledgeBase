@@ -20,12 +20,18 @@
 | `APP_LOCALE` | Fallback language if the workspace setting is missing (default `de`). |
 | `DISPLAY_TIMEZONE` | Time zone for display (default `Europe/Berlin`). Times are always stored in UTC. |
 | `PASSKEYS_USER_HANDLE_SECRET` | Optional. Defaults to `APP_KEY`. |
+| `PASSPORT_PRIVATE_KEY`, `PASSPORT_PUBLIC_KEY` | Optional. RSA keys for the OAuth tokens of the MCP server. Without them the keys are generated once on the first start and stored in the volume `app-storage`. Changing them signs out all connected AI apps. |
+| `MCP_REDIRECT_DOMAINS` | Comma-separated origins MCP clients may use as OAuth callback. Default: `https://claude.ai,https://claude.com,http://localhost` (localhost covers Claude Code and desktop clients). Never use `*`: anybody could register a client and trick users into approving it. |
 
 `APP_DEBUG` is fixed to `false` in the image.
 
 ## Addresses
 
 All addresses are English: `/login`, `/spaces/<name>`, `/<space>/<title>-<number>` for pages, `/search`, `/account`, `/admin`. The German addresses of earlier versions (`/anmelden`, `/bereiche/…`, `/seiten/…`, `/anhaenge/…`, `/admin/benutzer` …) forward permanently to the new ones, so old bookmarks, sign-in links already sent and links in page content keep working. Links stored in content use the permanent form `/pages/<number>`, which survives renaming and moving.
+
+## MCP server and OAuth
+
+The MCP endpoint `/mcp` and the OAuth endpoints (`/oauth/…`, `/.well-known/oauth-…`) must be publicly reachable for claude.ai – do **not** put them behind Cloudflare Access. Access tokens are valid for one hour, refresh tokens for 30 days. All generated URLs (also the OAuth metadata) are built from `APP_URL`, never from the Host header of a request. Details for users: [MCP](MCP.md).
 
 ## Cloudflare Access for `/admin`
 
@@ -50,6 +56,8 @@ As the app is only reachable through the proxy, it trusts the forwarded visitor 
 | Passkey endpoints | 10 per minute |
 | Search | 60 per minute |
 | Editor preview | 120 per minute |
+| MCP requests | 120 per minute per user |
+| OAuth client registration and metadata | 30 per hour per IP |
 | Uploads | 60 per hour |
 | Import | 20 per hour and 50 per day per user |
 | Export | 30 per hour |

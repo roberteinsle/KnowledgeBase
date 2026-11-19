@@ -9,7 +9,7 @@ final class RedirectSanitizer
 {
     public static function internalPath(?string $target): ?string
     {
-        if ($target === null || $target === '' || strlen($target) > 255) {
+        if ($target === null || $target === '' || strlen($target) > 2048) {
             return null;
         }
 

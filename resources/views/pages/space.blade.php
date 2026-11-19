@@ -10,7 +10,10 @@
             </div>
         </div>
         @can('contribute', $space)
-            <a href="{{ route('pages.create', $space) }}" class="btn-primary"><x-kb-icon name="plus" class="size-4" /> {{ __('New page') }}</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('import.create', $space) }}" class="btn-secondary"><x-kb-icon name="upload" class="size-4" /> {{ __('Import Markdown') }}</a>
+                <a href="{{ route('pages.create', $space) }}" class="btn-primary"><x-kb-icon name="plus" class="size-4" /> {{ __('New page') }}</a>
+            </div>
         @endcan
     </div>
 

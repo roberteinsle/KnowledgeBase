@@ -46,5 +46,9 @@
         <button type="submit" class="btn-primary">{{ __('Save') }}</button>
     </form>
 
+    @foreach (app(\App\Core\Account\AccountSectionRegistry::class)->renderFor($user) as $section)
+        {{ $section }}
+    @endforeach
+
     <p class="mt-6 text-sm"><a href="{{ route('account.security') }}" class="text-indigo-700 hover:underline">{{ __('Passkeys and two-factor authentication') }} →</a></p>
 </x-layouts.app>

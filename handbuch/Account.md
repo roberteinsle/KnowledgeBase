@@ -16,6 +16,10 @@ The avatar appears in the header (also in the administration area), in the user 
 - **E-mail address:** only an administrator can change it.
 - **Language:** German, English, French, Italian or Spanish; *Workspace default* uses the browser language or the default of the workspace.
 
+## Connected AI apps
+
+Apps such as Claude that you connected via MCP, with the date of the connection. **Revoke** ends their access immediately – see [MCP](MCP.md).
+
 ## Security
 
 **Passkeys and two-factor authentication** leads to the security page – see [Sign-in](Sign-in.md).
