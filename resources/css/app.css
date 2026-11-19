@@ -1,9 +1,50 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@source '../views';
+@source '../js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+[x-cloak] { display: none !important; }
+
+/* Rendered Markdown */
+.kb-prose .heading-anchor { @apply ml-2 text-slate-300 no-underline opacity-0 transition-opacity; }
+.kb-prose :is(h1, h2, h3, h4):hover .heading-anchor { @apply opacity-100; }
+.kb-prose li:has(> input[type='checkbox']) { @apply list-none -ml-5; }
+
+/* TipTap editor */
+.kb-editor .ProseMirror { @apply min-h-[24rem] px-4 py-3 outline-none; }
+.kb-editor .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); @apply pointer-events-none float-left h-0 text-slate-400; }
+.kb-editor .ProseMirror table { @apply border-collapse; }
+.kb-editor .ProseMirror td, .kb-editor .ProseMirror th { @apply border border-slate-300 px-2 py-1 align-top; }
+.kb-editor .ProseMirror ul[data-type='taskList'] { @apply list-none pl-0; }
+.kb-editor .ProseMirror ul[data-type='taskList'] li { @apply flex gap-2; }
+
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50;
+}
+@utility btn-primary {
+    @apply btn bg-indigo-600 text-white hover:bg-indigo-700;
+}
+@utility btn-secondary {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+}
+@utility btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700;
+}
+@utility btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+}
+@utility input {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 focus:outline-none;
+}
+@utility label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+}
+@utility card {
+    @apply rounded-lg border border-slate-200 bg-white p-4 shadow-sm;
 }

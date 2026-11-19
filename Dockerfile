@@ -12,6 +12,9 @@ RUN npm run build
 
 # --- Stufe 2: Composer (gleiche PHP-Version wie Runtime) ---
 FROM serversideup/php:${PHP_VERSION}-cli-alpine AS vendor
+# Same extensions as the runtime, so Composer's platform check stays real (Filament needs intl).
+USER root
+RUN install-php-extensions intl gd zip bcmath exif pdo_pgsql
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction

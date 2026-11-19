@@ -6,56 +6,70 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Knowledgebase
 
-<Ein bis zwei Sätze: was die App macht und für wen.>
+Wissensdatenbank für Teams: Workspace → Bereiche (Spaces) → verschachtelte Seiten mit Versionen, Labels, Anhängen, Volltextsuche und Markdown-Import/-Export. Für Teams, die Dokumentation selbst hosten wollen.
 
 Die gemeinsamen Standards oben gelten vollständig. Hier steht nur, was für dieses Projekt dazukommt oder bewusst abweicht.
 
-## Stand des Repos
-
-Das Repo ist noch die leere Vorlage `app-template`: Es gibt noch kein `composer.json`, also auch kein Laravel. Zuerst einmal `bin/init-laravel.sh` ausführen (installiert Laravel 13, Filament 5, Pest und Larastan, stellt `phpunit.xml` auf `pgsql`/`app_test` um, legt `phpstan.neon` mit Level 5 auf `app/` an, fragt interaktiv nach der Filament-Panel-ID → `admin`). Bis dahin überspringt die CI Tests und Image-Build (Job `check`). Danach diesen Abschnitt löschen.
-
 ## Projekt
 
-- Sichtbarkeit: <öffentlich/privat>
-- Sprache der Oberfläche: Deutsch
-- Erreichbarkeit: <öffentlich → Admin-Bereich `/admin` hinter Cloudflare Access / nur im Tailnet>
-- Deploy: automatisch per Webhook (`AUTO_DEPLOY=true`)<, oder Begründung für manuell>
-- Queue und Scheduler: keine (`QUEUE_CONNECTION=sync`). Werden Jobs oder ein Scheduler gebraucht: `QUEUE_CONNECTION=database` und eigene Services `worker`/`scheduler` aus demselben Image in `deploy/docker-compose.coolify.yml`.
+- Sichtbarkeit: öffentlich
+- Sprache der Oberfläche: Deutsch (Standard), dazu Englisch, Französisch, Italienisch, Spanisch
+- Erreichbarkeit: öffentlich → Admin-Bereich `/admin` hinter Cloudflare Access
+- Deploy: automatisch per Webhook (`AUTO_DEPLOY=true`)
+- Queue und Scheduler: keine (`QUEUE_CONNECTION=sync`)
+- Wiki: `scripts/build-wiki.py --push` schreibt nach `<origin>.wiki.git`
 
 ## Befehle
 
 ```bash
-bin/init-laravel.sh                   # nur einmal (siehe oben)
-docker compose up -d db               # PostgreSQL 18 lokal (startet im Devcontainer automatisch)
-php artisan serve                     # App auf :8000 (plus: npm run dev für Vite auf :5173)
-vendor/bin/pest                       # alle Tests (PostgreSQL, Datenbank app_test)
-vendor/bin/pest tests/Feature/FooTest.php   # eine Datei
-vendor/bin/pest --filter="name des tests"   # einzelner Test
-vendor/bin/pint                       # Code-Stil (CI: --test)
-vendor/bin/phpstan analyse            # Larastan (CI: --memory-limit=2G)
-docker compose up -d --build          # App im Produktions-Image auf :8080 testen
+docker compose up -d db                        # PostgreSQL 18 (startet im Devcontainer automatisch)
+php artisan serve                              # App :8000 (plus: npm run dev für Vite :5173)
+vendor/bin/pest                                # alle Tests (PostgreSQL, Datenbank app_test)
+vendor/bin/pest tests/Feature/Pages/PageTest.php
+vendor/bin/pest --filter="moves pages"         # einzelner Test
+vendor/bin/pint                                # Code-Stil
+vendor/bin/phpstan analyse --memory-limit=2G   # Larastan Level 5
+npm run build                                  # Assets (Editor-Bundle wird lazy geladen)
+python3 scripts/build-wiki.py [--push]         # Wiki aus handbuch/
 ```
 
-Die Testdatenbank `app_test` legt `.devcontainer/setup.sh` an; fehlt sie: `docker compose exec -T db createdb -U app app_test`.
+Xdebug im Devcontainer bremst und lärmt: `export XDEBUG_MODE=off`. Lokal landen Anmeldelinks in `storage/logs/laravel.log` (`MAIL_MAILER=log`).
 
 Slash-Commands: `/login-audit` prüft und härtet den Login-Flow.
 
-## Build und Betrieb
-
-- Image: `serversideup/php:8.5-fpm-nginx-alpine`, mehrstufig (Vite-Assets → Composer ohne Scripts → Runtime), läuft als `www-data` auf Port 8080, Healthcheck `/up`. Migrationen und `optimize` laufen beim Start über die AUTORUN-Variablen von serversideup, nicht über eigene Skripte.
-- Eigene Startskripte gehören nach `docker/entrypoint.d/` (vor `50-laravel-automations`). `40-storage.sh` legt die `storage/`-Ordner im Volume an und bricht ab, wenn das Volume nicht beschreibbar ist.
-- `deploy/docker-compose.coolify.yml` liest Coolify nicht aus dem Repo: Nach Änderungen den Inhalt von Hand in Coolify einfügen. Neue Env-Variablen dort **und** in `.env.example` ergänzen.
-- PHP-Erweiterungen stehen an drei Stellen: `Dockerfile` (`install-php-extensions`), `.devcontainer/setup.sh` und `.github/workflows/build.yml` (`setup-php`).
-
-## Bekannte Stolpersteine
-
-- Der lokale Branch heißt `master`, `.github/workflows/build.yml` reagiert aber nur auf `main` (Push, Pull Request, `latest`-Tag, Auto-Deploy). Vor dem ersten Push den Branch in `main` umbenennen, sonst laufen weder CI noch Deploy.
-- `scripts/build-wiki.py` (laut Standards für das Wiki aus `handbuch/`) gibt es in diesem Repo noch nicht.
-
 ## Architektur
 
-<Module, Registries, wichtige Services und Regeln, die man leicht bricht.>
+```
+app/Core/            Registries, Aktivitätsprotokoll, Middleware (SecurityHeaders, SetLocale), Rate-Limits
+app/Modules/<Modul>/ je Modul: Models, Services, Contracts, Policies, Http, routes.php, <Modul>ServiceProvider
+app/Filament/        Admin-Oberfläche (/admin) – schreibt nur über die Modul-Services
+resources/views/     Frontend (Blade, kein Livewire); Layouts als anonyme Komponenten x-layouts.app / x-layouts.guest
+```
+
+Module: `Workspace` (Einstellungen, Benutzer, Startseite), `Auth` (Magic Link, Passkeys, TOTP, Konto), `Groups`, `Spaces`, `Pages` (Seiten, Versionen, Labels, Anhänge, Papierkorb, Space-Startseite), `Search`, `ImportExport`. Provider-Reihenfolge in `bootstrap/providers.php`.
+
+**Modulgrenzen** – Module greifen nie auf Interna anderer Module zu, sondern nur über:
+- **Registries in `app/Core`** (Singletons): `NavigationRegistry` (Hauptnavigation, Kontomenü, mobile Tab-Leiste), `DashboardRegistry` (Widgets der Startseite), `SearchRegistry` (`SearchProvider` je Inhaltstyp), `ImportRegistry`/`ExportRegistry` (Formate). Neue Funktionen hängen sich dort ein, nicht im Layout oder in fremden Controllern.
+- **Contracts**: `Spaces\Contracts\SpaceAccess` ist die einzige Stelle für „was darf dieser Benutzer in diesem Bereich“; `Groups\Contracts\GroupMembership`; `Pages\Contracts\PageWriter` für Seitenänderungen aus anderen Modulen (Import, später MCP/Bases).
+- **Events**: `Spaces\Events\SpaceDeleting` – Pages räumt dort Anhang-Dateien auf.
+- Models anderer Module dürfen gelesen werden (Relationen, Abfragen); geschrieben wird nur über deren Services.
+
+**Regeln, die man leicht bricht:**
+- Jede Abfrage über Seiten/Anhänge filtert mit `SpaceAccess::spaceIdsFor($user)` – auch Suche, Labels, Dashboard-Widgets, Exporte. Bereiche ohne Recht sind unsichtbar.
+- Rollen: `SpaceRole` reader < editor < admin (Policy-Abilities `view`, `contribute`, `moderate`); Workspace-Admins sind überall Bereichsadmin. Die Gruppe *Everyone* (`groups.system_key = 'everyone'`) hat keine gespeicherten Mitglieder, sie gilt implizit für alle.
+- Seiteninhalt ist **Markdown** und die einzige Quelle (Editor, Suche, Import, Export, Diff). Gerendert nur über `MarkdownRenderer` (`html_input => escape`). Der TipTap-Editor (`resources/js/editor.js`) liest/schreibt Markdown in das Textarea, das abgeschickt wird.
+- Jede inhaltliche Änderung erzeugt über `PageService` eine `PageVersion`; `update()` prüft im Controller die mitgeschickte `version` (kein stilles Überschreiben). `amendLatestVersion()` nur für maschinelle Korrekturen direkt nach dem Anlegen (Link-Umschreibung beim Import).
+- Papierkorb = SoftDeletes, immer samt Unterseiten (`descendantIds`). Endgültiges Löschen nur aus dem Papierkorb.
+- Volltextsuche: generierte `tsvector`-Spalten (`'simple'`-Config, sprachneutral) mit GIN-Index; Suchbegriffe nur über `SearchQuery::toTsQuery()` als gebundener Parameter.
+- Anhänge auf der privaten Disk, Auslieferung nur über `AttachmentController` (inline nur `attachments.inline_mimes`). Import legt nur Dateien mit erlaubter Endung als Anhang an.
+- `Workspace::current()` ist pro Request gecacht (scoped Binding), nie in statischen Properties cachen – sonst laufen Tests ineinander.
+- Keine Passwörter: `password.confirm` (Laravel/Passkey-Paket) zeigt auf `/bestaetigen` (Passkey oder Bestätigungslink); jede Anmeldung zählt 15 Minuten als frische Bestätigung (`Login`-Listener im `AuthServiceProvider`). POST/DELETE-Routen nicht hinter `password.confirm` hängen (der Redirect zurück wäre ein GET) – stattdessen die GET-Seite davor schützen.
+- Filament-Ressourcen/-Seiten nutzen den Trait `App\Filament\Concerns\AdminOnly` und schreiben über `handleRecordCreation`/`handleRecordUpdate` in die Services.
+- Frontend-URLs und Filament-Slugs deutsch (`/bereiche/{space}`, `/seiten/{page}/bearbeiten`, `/admin/benutzer/neu`).
+
+**Übersetzungen:** Quelltexte englisch in `__()`, Übersetzungen in `lang/{de,en,fr,it,es}.json`. `tests/Feature/LocaleTest.php` schlägt fehl, wenn ein `__('…')`-Schlüssel in `de.json` fehlt oder eine Sprache unvollständig ist – neue Texte also immer in allen fünf Dateien ergänzen. Labels, die indirekt übersetzt werden (`NavigationItem::$label`, `label()` von Importern/Exportern/SearchProvidern), ebenfalls eintragen. Die Laravel-Texte (`lang/<locale>/*.php`, Grundbestand der JSON-Dateien) stammen einmalig von `laravel-lang/common`; das Paket ist bewusst nicht installiert (verlassene Abhängigkeiten lassen `composer audit` scheitern) – zum Aktualisieren kurz installieren, `php artisan lang:update`, wieder entfernen.
 
 ## Abweichungen von den Standards
 
-Keine.
+- `Referrer-Policy` ist global `same-origin`, auf der Magic-Link-Seite `no-referrer`.
+- CSP erlaubt `'unsafe-inline'`/`'unsafe-eval'` für Skripte, weil Alpine/Livewire (Filament) Ausdrücke zur Laufzeit auswerten.
