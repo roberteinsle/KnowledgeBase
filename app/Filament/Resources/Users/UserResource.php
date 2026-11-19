@@ -34,7 +34,7 @@ class UserResource extends Resource
 
     protected static ?string $model = User::class;
 
-    protected static ?string $slug = 'benutzer';
+    protected static ?string $slug = 'users';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
@@ -114,8 +114,8 @@ class UserResource extends Resource
     {
         return [
             'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/neu'),
-            'edit' => EditUser::route('/{record}/bearbeiten'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

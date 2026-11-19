@@ -20,7 +20,7 @@ it('asks for the second factor after a magic link', function () {
     [$user] = userWithTotp();
     $token = magicToken($user);
 
-    $this->post("/anmelden/link/{$token}")->assertRedirect(route('two-factor.show'));
+    $this->post("/login/link/{$token}")->assertRedirect(route('two-factor.show'));
 
     $this->assertGuest();
     $this->get(route('two-factor.show'))->assertOk();
@@ -28,7 +28,7 @@ it('asks for the second factor after a magic link', function () {
 
 it('rejects a wrong code', function () {
     [$user] = userWithTotp();
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
 
     $this->post(route('two-factor.verify'), ['code' => '000000'])->assertSessionHasErrors('code');
     $this->assertGuest();
@@ -38,31 +38,31 @@ it('signs in with a valid code, but only once per code', function () {
     [$user, $secret] = userWithTotp();
     $code = app(Google2FA::class)->getCurrentOtp($secret);
 
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
     $this->post(route('two-factor.verify'), ['code' => $code])->assertRedirect();
     $this->assertAuthenticatedAs($user);
 
     auth()->logout();
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
     $this->post(route('two-factor.verify'), ['code' => $code])->assertSessionHasErrors('code');
 });
 
 it('accepts each recovery code once', function () {
     [$user, , $codes] = userWithTotp();
 
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
     $this->post(route('two-factor.verify'), ['code' => strtolower($codes[0])])->assertRedirect();
     $this->assertAuthenticatedAs($user);
     expect($user->fresh()->totp_recovery_codes)->toHaveCount(7);
 
     auth()->logout();
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
     $this->post(route('two-factor.verify'), ['code' => $codes[0]])->assertSessionHasErrors('code');
 });
 
 it('rate limits the code entry', function () {
     [$user] = userWithTotp();
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
 
     foreach (range(1, 5) as $i) {
         $this->post(route('two-factor.verify'), ['code' => '000000']);
@@ -72,8 +72,8 @@ it('rate limits the code entry', function () {
 });
 
 it('does not allow the challenge without a pending sign-in', function () {
-    $this->get(route('two-factor.show'))->assertRedirect('/anmelden');
-    $this->post(route('two-factor.verify'), ['code' => '123456'])->assertRedirect('/anmelden');
+    $this->get(route('two-factor.show'))->assertRedirect('/login');
+    $this->post(route('two-factor.verify'), ['code' => '123456'])->assertRedirect('/login');
 });
 
 it('stores the TOTP secret encrypted', function () {
@@ -117,7 +117,7 @@ it('counts a sign-in as fresh confirmation', function () {
     $user = member();
     $user->passkeys()->create(['name' => 'Test', 'credential_id' => 'abc', 'credential' => []]);
 
-    $this->post('/anmelden/link/'.magicToken($user));
+    $this->post('/login/link/'.magicToken($user));
 
     $this->get(route('account.security'))->assertOk();
 });
@@ -137,7 +137,7 @@ it('signs out deactivated users on their next request', function () {
     $this->actingAs($user);
     $user->forceFill(['is_active' => false])->save();
 
-    $this->get('/')->assertRedirect('/anmelden');
+    $this->get('/')->assertRedirect('/login');
     $this->assertGuest();
 });
 

@@ -72,7 +72,7 @@
         </section>
     @endif
 
-    <section id="anhaenge" class="mt-10">
+    <section id="attachments" class="mt-10">
         <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold"><x-kb-icon name="paperclip" class="size-5" /> {{ __('Attachments') }}</h2>
         @if ($page->attachments->isEmpty())
             <p class="text-sm text-slate-500">{{ __('No attachments.') }}</p>

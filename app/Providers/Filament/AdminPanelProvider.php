@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Core\Http\LegacyRedirects;
 use App\Core\Http\Middleware\SetLocale;
 use App\Modules\Workspace\Models\Workspace;
 use Filament\Actions\Action;
@@ -20,6 +21,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 /**
@@ -64,5 +66,18 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 'account',
             ]);
+    }
+
+    public function boot(): void
+    {
+        // Former German admin paths (bookmarks).
+        Route::middleware('web')->prefix('admin')->group(function () {
+            $words = ['neu' => 'create', 'bearbeiten' => 'edit'];
+            LegacyRedirects::register('benutzer', 'admin/users', $words);
+            LegacyRedirects::register('gruppen', 'admin/groups', $words);
+            LegacyRedirects::register('bereiche', 'admin/spaces', $words);
+            LegacyRedirects::register('protokoll', 'admin/activity-log');
+            LegacyRedirects::register('einstellungen', 'admin/settings');
+        });
     }
 }

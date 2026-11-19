@@ -2,6 +2,7 @@
 
 namespace App\Modules\Search;
 
+use App\Core\Http\LegacyRedirects;
 use App\Core\Navigation\NavigationItem;
 use App\Core\Navigation\NavigationRegistry;
 use App\Modules\Search\Http\Controllers\SearchController;
@@ -13,7 +14,8 @@ class SearchServiceProvider extends ServiceProvider
     public function boot(NavigationRegistry $navigation): void
     {
         Route::middleware(['web', 'auth', 'account', 'throttle:search'])->group(function () {
-            Route::get('/suche', SearchController::class)->name('search');
+            Route::get('/search', SearchController::class)->name('search');
+            LegacyRedirects::register('suche', 'search');
         });
 
         $navigation->add(new NavigationItem(

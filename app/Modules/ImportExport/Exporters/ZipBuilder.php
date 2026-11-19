@@ -13,7 +13,8 @@ use ZipArchive;
 /**
  * Layout (the same the ZIP importer reads):
  *   Title.md, Title/Child.md … and _attachments/<id>-<name>
- * Links to attachments and exported pages become relative paths.
+ * Links to attachments and exported pages become relative paths (also the
+ * former German paths /seiten/… and /anhaenge/… found in older content).
  */
 final class ZipBuilder
 {
@@ -96,13 +97,13 @@ final class ZipBuilder
         $up = str_repeat('../', $depth);
         $attachmentIds = $pages->flatMap(fn (Page $p) => $p->attachments)->keyBy('id');
 
-        $content = preg_replace_callback('#\((/anhaenge/(\d+))\)#', function ($m) use ($attachmentIds, $up) {
+        $content = preg_replace_callback('#\((/(?:attachments|anhaenge)/(\d+))\)#', function ($m) use ($attachmentIds, $up) {
             $attachment = $attachmentIds->get((int) $m[2]);
 
             return $attachment ? '(<'.$up.$this->attachmentPath($attachment).'>)' : $m[0];
         }, $page->content) ?? $page->content;
 
-        return preg_replace_callback('#\((/seiten/(\d+))([^)\s]*)\)#', function ($m) use ($up) {
+        return preg_replace_callback('#\((/(?:pages|seiten)/(\d+))([^)\s]*)\)#', function ($m) use ($up) {
             $target = $this->pagePaths[(int) $m[2]] ?? null;
 
             return $target ? '(<'.$up.$target.'>'.')' : $m[0];

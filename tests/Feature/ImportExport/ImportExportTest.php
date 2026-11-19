@@ -79,8 +79,8 @@ it('imports a ZIP with folders, images and links between pages', function () {
 
     $attachment = Attachment::query()->sole();
     expect($attachment->page_id)->toBe($root->id);
-    expect($root->content)->toContain('(/seiten/'.$vacation->id.')')->toContain('(/anhaenge/'.$attachment->id.')');
-    expect($vacation->content)->toContain('(/seiten/'.$root->id.')')->toContain('[Start](/seiten/'.$root->id.')');
+    expect($root->content)->toContain('(/pages/'.$vacation->id.')')->toContain('(/attachments/'.$attachment->id.')');
+    expect($vacation->content)->toContain('(/pages/'.$root->id.')')->toContain('[Start](/pages/'.$root->id.')');
     expect($root->versions()->count())->toBe(1);
 });
 
@@ -131,9 +131,9 @@ it('returns 404 for unknown export formats', function () {
 
 it('exports a space as ZIP that imports again with the same structure', function () {
     $root = page($this->space, ['title' => 'Wurzel', 'content' => 'Oben']);
-    $child = page($this->space, ['title' => 'Kind', 'content' => 'Zur [Wurzel](/seiten/'.$root->id.')'], $root);
+    $child = page($this->space, ['title' => 'Kind', 'content' => 'Zur [Wurzel](/pages/'.$root->id.')'], $root);
     $attachment = app(AttachmentService::class)->storeContents($child, 'liste.txt', 'Inhalt', $this->editor);
-    app(PageService::class)->update($child, 'Kind', $child->content."\n\n[Liste](/anhaenge/{$attachment->id})", $this->editor);
+    app(PageService::class)->update($child, 'Kind', $child->content."\n\n[Liste](/attachments/{$attachment->id})", $this->editor);
 
     $response = $this->actingAs($this->editor)->get(route('export.space', [$this->space, 'space-zip']))->assertOk();
     $zipPath = $response->baseResponse->getFile()->getPathname();
@@ -155,6 +155,6 @@ it('exports a space as ZIP that imports again with the same structure', function
     $newRoot = Page::query()->where('space_id', $target->id)->where('title', 'Wurzel')->sole();
     $newChild = Page::query()->where('space_id', $target->id)->where('title', 'Kind')->sole();
     expect($newChild->parent_id)->toBe($newRoot->id);
-    expect($newChild->content)->toContain('/seiten/'.$newRoot->id);
+    expect($newChild->content)->toContain('/pages/'.$newRoot->id);
     expect($newChild->attachments()->count())->toBe(1);
 });

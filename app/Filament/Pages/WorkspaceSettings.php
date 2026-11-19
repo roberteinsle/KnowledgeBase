@@ -26,7 +26,7 @@ class WorkspaceSettings extends Page implements HasSchemas
     use AdminOnly;
     use InteractsWithSchemas;
 
-    protected static ?string $slug = 'einstellungen';
+    protected static ?string $slug = 'settings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 

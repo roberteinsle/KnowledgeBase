@@ -14,14 +14,14 @@ it('finds pages by title and content with prefix matching', function () {
     page($this->space, ['title' => 'Urlaubsantrag', 'content' => 'So beantragst du deinen Urlaub im Personalportal.']);
     page($this->space, ['title' => 'Kantine', 'content' => 'Speiseplan']);
 
-    $this->actingAs($this->user)->get('/suche?q=personalport')
+    $this->actingAs($this->user)->get('/search?q=personalport')
         ->assertOk()->assertSee('Urlaubsantrag')->assertDontSee('Kantine');
 });
 
 it('highlights hits without allowing HTML', function () {
     page($this->space, ['title' => 'Hinweis', 'content' => 'Achtung <b>wichtig</b> Sicherheit']);
 
-    $this->actingAs($this->user)->get('/suche?q=sicherheit')
+    $this->actingAs($this->user)->get('/search?q=sicherheit')
         ->assertSee('<mark class="bg-yellow-100 px-0.5">Sicherheit</mark>', false)
         ->assertDontSee('<b>wichtig</b>', false);
 });
@@ -29,27 +29,27 @@ it('highlights hits without allowing HTML', function () {
 it('never shows results from spaces the user cannot read', function () {
     page(space(), ['title' => 'Gehaltsliste', 'content' => 'vertraulich']);
 
-    $this->actingAs($this->user)->get('/suche?q=vertraulich')->assertOk()->assertDontSee('Gehaltsliste');
+    $this->actingAs($this->user)->get('/search?q=vertraulich')->assertOk()->assertDontSee('Gehaltsliste');
 });
 
 it('finds attachments by name and text content', function () {
     $page = page($this->space, ['title' => 'Formulare']);
     app(AttachmentService::class)->storeContents($page, 'reisekosten.txt', 'Kilometerpauschale 30 Cent', admin());
 
-    $this->actingAs($this->user)->get('/suche?q=kilometerpauschale')->assertOk()->assertSee('reisekosten.txt');
+    $this->actingAs($this->user)->get('/search?q=kilometerpauschale')->assertOk()->assertSee('reisekosten.txt');
 });
 
 it('does not show trashed pages', function () {
     $page = page($this->space, ['title' => 'Veraltet', 'content' => 'archivwort']);
     app(PageService::class)->trash($page, admin());
 
-    $this->actingAs($this->user)->get('/suche?q=archivwort')->assertDontSee('Veraltet');
+    $this->actingAs($this->user)->get('/search?q=archivwort')->assertDontSee('Veraltet');
 });
 
 it('handles SQL injection and tsquery syntax safely', function (string $payload) {
     page($this->space, ['title' => 'Normal']);
 
-    $response = $this->actingAs($this->user)->get('/suche?q='.urlencode($payload));
+    $response = $this->actingAs($this->user)->get('/search?q='.urlencode($payload));
 
     expect($response->status())->toBe(200);
     expect($response->getContent())->not->toContain('SQLSTATE');
@@ -57,5 +57,5 @@ it('handles SQL injection and tsquery syntax safely', function (string $payload)
 })->with([...sqlInjectionPayloads(), 'a & | ! ( ) :*', '\\', "''''", str_repeat('x', 200)]);
 
 it('rejects overly long queries', function () {
-    $this->actingAs($this->user)->get('/suche?q='.str_repeat('x', 201))->assertSessionHasErrors('q');
+    $this->actingAs($this->user)->get('/search?q='.str_repeat('x', 201))->assertSessionHasErrors('q');
 });

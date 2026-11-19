@@ -15,7 +15,7 @@ Wissensdatenbank für Teams: Bereiche mit verschachtelten Seiten, Versionsverlau
 
 1. Codespace öffnen (Code → Codespaces → Create codespace on main).
 2. `php artisan serve` und in einem zweiten Terminal `npm run dev`.
-3. In `.env` `ADMIN_EMAIL` setzen, unter `/anmelden` einen Link anfordern; der Link steht lokal in `storage/logs/laravel.log`.
+3. In `.env` `ADMIN_EMAIL` setzen, unter `/login` einen Link anfordern; der Link steht lokal in `storage/logs/laravel.log`.
 
 Details stehen im Handbuch (`handbuch/`, Quelle des Wikis).
 

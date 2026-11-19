@@ -20,7 +20,7 @@ class ActivityResource extends Resource
 
     protected static ?string $model = Activity::class;
 
-    protected static ?string $slug = 'protokoll';
+    protected static ?string $slug = 'activity-log';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 

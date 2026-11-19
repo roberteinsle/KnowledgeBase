@@ -2,7 +2,7 @@
 
 ## Bereiche
 
-Ein Bereich bündelt Seiten, Rechte und Beteiligte für ein Team, ein Projekt oder einen Zweck. Bereiche legen Administratoren unter **Administration → Bereiche** an: Name, Symbol (Emoji), URL-Name (z. B. `personal` → `/bereiche/personal`) und Beschreibung.
+Ein Bereich bündelt Seiten, Rechte und Beteiligte für ein Team, ein Projekt oder einen Zweck. Bereiche legen Administratoren unter **Administration → Bereiche** an: Name, Symbol (Emoji), URL-Name (z. B. `personal` → `/spaces/personal`) und Beschreibung.
 
 Das Löschen eines Bereichs entfernt alle Seiten, Versionen und Anhänge endgültig.
 

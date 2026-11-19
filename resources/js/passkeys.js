@@ -55,7 +55,7 @@ export function initPasskeys() {
             } catch (error) {
                 // 423: the confirmation window has expired → confirm first.
                 if (error?.status === 423 || error?.response?.status === 423) {
-                    window.location.href = root.dataset.confirmUrl || '/bestaetigen'
+                    window.location.href = root.dataset.confirmUrl || '/confirm'
                     return
                 }
                 if (!isCancelled(error)) fail(root, error)

@@ -48,7 +48,7 @@ Unten auf jeder Seite: Dateien hochladen (bis 20 MB je Datei, bis 10 Dateien auf
 - PDFs und Bilder öffnen sich im Browser, alle anderen Dateien werden heruntergeladen.
 - Anhänge sieht nur, wer die Seite lesen darf.
 - Text-, Markdown- und CSV-Dateien werden für die [Suche](Suche.md) mit erfasst.
-- Ein Bild im Text einbinden: `![Beschreibung](/anhaenge/123)` – die Adresse ist der Link des Anhangs.
+- Ein Bild im Text einbinden: `![Beschreibung](/attachments/123)` – die Adresse ist der Link des Anhangs.
 
 ## Papierkorb
 

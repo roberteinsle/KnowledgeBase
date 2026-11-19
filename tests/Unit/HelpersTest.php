@@ -17,8 +17,8 @@ it('allows only internal redirect targets', function (?string $input, ?string $e
 
     expect(RedirectSanitizer::internalPath($input))->toBe($expected);
 })->with([
-    ['/seiten/1', '/seiten/1'],
-    ['https://kb.example.com/suche?q=a', '/suche?q=a'],
+    ['/pages/1', '/pages/1'],
+    ['https://kb.example.com/search?q=a', '/search?q=a'],
     ['https://evil.example.net/', null],
     ['//evil.example.net', null],
     ['/\\evil.example.net', null],

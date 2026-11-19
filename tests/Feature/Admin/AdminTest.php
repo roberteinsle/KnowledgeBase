@@ -15,12 +15,12 @@ use Livewire\Livewire;
 
 it('keeps members out of the admin area', function () {
     $this->actingAs(member())->get('/admin')->assertForbidden();
-    $this->actingAs(member())->get('/admin/benutzer')->assertForbidden();
+    $this->actingAs(member())->get('/admin/users')->assertForbidden();
 });
 
 it('shows every admin page to administrators', function (string $url) {
     $this->actingAs(admin())->get($url)->assertOk();
-})->with(['/admin', '/admin/benutzer', '/admin/benutzer/neu', '/admin/gruppen', '/admin/gruppen/neu', '/admin/bereiche', '/admin/bereiche/neu', '/admin/labels', '/admin/protokoll', '/admin/einstellungen']);
+})->with(['/admin', '/admin/users', '/admin/users/create', '/admin/groups', '/admin/groups/create', '/admin/spaces', '/admin/spaces/create', '/admin/labels', '/admin/activity-log', '/admin/settings']);
 
 it('creates users through the service with normalised address', function () {
     $this->actingAs(admin());

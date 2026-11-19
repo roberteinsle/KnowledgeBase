@@ -67,3 +67,9 @@ Jeder Push auf `main` löst Tests, Image-Build und das Redeploy aus. Für einen 
 - Anhänge auf einer privaten Disk, Auslieferung nur nach Rechteprüfung; nur PDFs und Rasterbilder inline.
 - Markdown wird mit maskiertem HTML gerendert; unsichere Links werden entfernt.
 - Keine externen Ressourcen (Schriften, CDNs) – alles wird von der App selbst ausgeliefert.
+
+## Adressen
+
+Alle Adressen sind englisch, unabhängig von der gewählten Sprache: `/login`, `/spaces/<name>`, `/pages/<nummer>`, `/search`, `/account`, `/admin`. Die deutschen Adressen früherer Versionen (`/anmelden`, `/bereiche/…`, `/seiten/…`, `/anhaenge/…`, `/admin/benutzer` …) leiten dauerhaft auf die neuen weiter; alte Lesezeichen, bereits verschickte Anmeldelinks und Links in Seiteninhalten funktionieren also weiter.
+
+Für Cloudflare Access ändert sich nichts: Der Admin-Bereich liegt weiter unter `/admin`.

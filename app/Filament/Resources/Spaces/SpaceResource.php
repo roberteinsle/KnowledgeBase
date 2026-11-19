@@ -33,7 +33,7 @@ class SpaceResource extends Resource
 
     protected static ?string $model = Space::class;
 
-    protected static ?string $slug = 'bereiche';
+    protected static ?string $slug = 'spaces';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
@@ -117,8 +117,8 @@ class SpaceResource extends Resource
     {
         return [
             'index' => ListSpaces::route('/'),
-            'create' => CreateSpace::route('/neu'),
-            'edit' => EditSpace::route('/{record}/bearbeiten'),
+            'create' => CreateSpace::route('/create'),
+            'edit' => EditSpace::route('/{record}/edit'),
         ];
     }
 }

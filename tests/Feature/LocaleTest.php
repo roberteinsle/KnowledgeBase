@@ -8,17 +8,17 @@ it('uses the user language', function () {
 });
 
 it('lets guests switch the language', function () {
-    $this->post('/sprache', ['locale' => 'es'])->assertRedirect();
-    $this->get('/anmelden')->assertSee('lang="es"', false);
+    $this->post('/locale', ['locale' => 'es'])->assertRedirect();
+    $this->get('/login')->assertSee('lang="es"', false);
 });
 
 it('falls back to the browser language and then the workspace default', function () {
-    $this->withHeader('Accept-Language', 'it-IT,it;q=0.9')->get('/anmelden')->assertSee('lang="it"', false);
-    $this->withHeader('Accept-Language', 'ja')->get('/anmelden')->assertSee('lang="de"', false);
+    $this->withHeader('Accept-Language', 'it-IT,it;q=0.9')->get('/login')->assertSee('lang="it"', false);
+    $this->withHeader('Accept-Language', 'ja')->get('/login')->assertSee('lang="de"', false);
 });
 
 it('rejects unknown languages', function () {
-    $this->post('/sprache', ['locale' => 'xx'])->assertSessionHasErrors('locale');
+    $this->post('/locale', ['locale' => 'xx'])->assertSessionHasErrors('locale');
 });
 
 it('has every UI string translated in all languages', function (string $locale) {

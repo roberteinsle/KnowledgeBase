@@ -27,7 +27,7 @@ class GroupResource extends Resource
 
     protected static ?string $model = Group::class;
 
-    protected static ?string $slug = 'gruppen';
+    protected static ?string $slug = 'groups';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
@@ -85,8 +85,8 @@ class GroupResource extends Resource
     {
         return [
             'index' => ListGroups::route('/'),
-            'create' => CreateGroup::route('/neu'),
-            'edit' => EditGroup::route('/{record}/bearbeiten'),
+            'create' => CreateGroup::route('/create'),
+            'edit' => EditGroup::route('/{record}/edit'),
         ];
     }
 }

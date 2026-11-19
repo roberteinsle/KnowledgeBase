@@ -65,11 +65,12 @@ Module: `Workspace` (Einstellungen, Benutzer, Startseite), `Auth` (Magic Link, P
 - `Workspace::current()` ist pro Request gecacht (scoped Binding), nie in statischen Properties cachen – sonst laufen Tests ineinander.
 - Keine Passwörter: `password.confirm` (Laravel/Passkey-Paket) zeigt auf `/bestaetigen` (Passkey oder Bestätigungslink); jede Anmeldung zählt 15 Minuten als frische Bestätigung (`Login`-Listener im `AuthServiceProvider`). POST/DELETE-Routen nicht hinter `password.confirm` hängen (der Redirect zurück wäre ein GET) – stattdessen die GET-Seite davor schützen.
 - Filament-Ressourcen/-Seiten nutzen den Trait `App\Filament\Concerns\AdminOnly` und schreiben über `handleRecordCreation`/`handleRecordUpdate` in die Services.
-- Frontend-URLs und Filament-Slugs deutsch (`/bereiche/{space}`, `/seiten/{page}/bearbeiten`, `/admin/benutzer/neu`).
+- URLs und Filament-Slugs sind immer **englisch**, unabhängig von der Sprache des Benutzers (`/spaces/{space}`, `/pages/{page}/edit`, `/admin/users/create`). Die früheren deutschen Pfade leiten per 301 weiter (`App\Core\Http\LegacyRedirects`, je Modul in dessen `routes.php` registriert) – nicht entfernen: alte Anmeldelinks, Lesezeichen und in Seiteninhalten gespeicherte Links (`/seiten/…`, `/anhaenge/…`) hängen daran; der ZIP-Export erkennt beide Formen.
 
 **Übersetzungen:** Quelltexte englisch in `__()`, Übersetzungen in `lang/{de,en,fr,it,es}.json`. `tests/Feature/LocaleTest.php` schlägt fehl, wenn ein `__('…')`-Schlüssel in `de.json` fehlt oder eine Sprache unvollständig ist – neue Texte also immer in allen fünf Dateien ergänzen. Labels, die indirekt übersetzt werden (`NavigationItem::$label`, `label()` von Importern/Exportern/SearchProvidern), ebenfalls eintragen. Die Laravel-Texte (`lang/<locale>/*.php`, Grundbestand der JSON-Dateien) stammen einmalig von `laravel-lang/common`; das Paket ist bewusst nicht installiert (verlassene Abhängigkeiten lassen `composer audit` scheitern) – zum Aktualisieren kurz installieren, `php artisan lang:update`, wieder entfernen.
 
 ## Abweichungen von den Standards
 
+- URLs und Filament-Slugs englisch statt deutsch: Die Oberfläche ist fünfsprachig, eine einzelne Sprache in den Adressen wäre für die meisten Benutzer fremd.
 - `Referrer-Policy` ist global `same-origin`, auf der Magic-Link-Seite `no-referrer`.
 - CSP erlaubt `'unsafe-inline'`/`'unsafe-eval'` für Skripte, weil Alpine/Livewire (Filament) Ausdrücke zur Laufzeit auswerten.
