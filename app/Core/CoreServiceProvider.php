@@ -46,9 +46,10 @@ class CoreServiceProvider extends ServiceProvider
         $this->configureRateLimits();
 
         // All generated URLs (sign-in links, OAuth metadata …) use APP_URL,
-        // never the Host header of the request.
+        // never the Host header of the request. Not locally: in Codespaces or
+        // on another port the browser address differs from APP_URL.
         $appUrl = (string) config('app.url');
-        if ($appUrl !== '' && ! $this->app->runningUnitTests()) {
+        if ($appUrl !== '' && ! $this->app->runningUnitTests() && ! $this->app->isLocal()) {
             URL::forceRootUrl($appUrl);
             if (str_starts_with($appUrl, 'https://')) {
                 URL::forceScheme('https');

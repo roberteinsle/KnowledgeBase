@@ -13,7 +13,7 @@ class SpaceController
     {
         $spaces = Space::query()
             ->whereIn('id', $access->spaceIdsFor($request->user()))
-            ->orderBy('name')
+            ->orderByRaw('lower(name)')->orderBy('id')
             ->get();
 
         return view('spaces.index', ['spaces' => $spaces]);

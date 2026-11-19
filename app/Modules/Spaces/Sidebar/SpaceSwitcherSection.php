@@ -31,7 +31,7 @@ class SpaceSwitcherSection implements SidebarSection
 
         return view('spaces.sidebar', [
             'current' => $space,
-            'spaces' => Space::query()->whereIn('id', app(SpaceAccess::class)->spaceIdsFor($user))->orderBy('name')->get(),
+            'spaces' => Space::query()->whereIn('id', app(SpaceAccess::class)->spaceIdsFor($user))->orderByRaw('lower(name)')->orderBy('id')->get(),
             'links' => $space ? $this->menus->for('space', $user, $space) : [],
         ]);
     }

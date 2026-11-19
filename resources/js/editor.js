@@ -6,8 +6,8 @@ import { TaskList, TaskItem } from '@tiptap/extension-list'
 import { Placeholder } from '@tiptap/extensions'
 
 /**
- * Rich-text editing on top of Markdown: the textarea stays the source of
- * truth that is submitted; TipTap reads and writes Markdown.
+ * Page editor. Opens in the Markdown source with a live preview; the rich
+ * text editor (TipTap) is optional. The textarea is always what is submitted.
  */
 export function mountEditor(root) {
     const source = root.querySelector('[data-editor-source]')
@@ -18,37 +18,14 @@ export function mountEditor(root) {
     const preview = root.querySelector('[data-preview]')
     const form = root.closest('form')
 
-    let editor
-    try {
-        editor = new Editor({
-            element: mount,
-            extensions: [
-                StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
-                Markdown,
-                Table.configure({ resizable: false }),
-                TableRow,
-                TableHeader,
-                TableCell,
-                TaskList,
-                TaskItem.configure({ nested: true }),
-                Placeholder.configure({ placeholder: root.dataset.placeholder || '' }),
-            ],
-            content: source.value,
-            contentType: 'markdown',
-        })
-    } catch (error) {
-        console.warn('Editor could not start, falling back to Markdown.', error)
-        return
-    }
+    let editor = null
+    let richMode = false
+    let dirty = false
 
-    let richMode = true
-    const sync = () => { if (richMode) source.value = editor.getMarkdown() }
-
-    // Live preview next to the Markdown source, rendered by the server so it
-    // looks exactly like the saved page. Debounced; only the latest answer wins.
+    // --- Live preview, rendered by the server (same renderer as the page) ---
     let previewTimer = null
     let previewRequest = 0
-    const renderPreview = () => {
+    const renderPreview = (delay = 300) => {
         clearTimeout(previewTimer)
         previewTimer = setTimeout(async () => {
             const request = ++previewRequest
@@ -69,27 +46,89 @@ export function mountEditor(root) {
             } catch (error) {
                 console.warn('Preview failed', error)
             }
-        }, 350)
-    }
-    source.addEventListener('input', () => { if (!richMode) renderPreview() })
-
-    const setMode = (rich) => {
-        if (rich === richMode) return
-        if (rich) {
-            editor.commands.setContent(source.value, { contentType: 'markdown' })
-        } else {
-            source.value = editor.getMarkdown()
-        }
-        richMode = rich
-        mount.hidden = !rich
-        sourcePane.hidden = rich
-        preview.hidden = rich
-        if (!rich) renderPreview()
-        toolbar.querySelectorAll('[data-cmd]').forEach((b) => { b.disabled = !rich })
-        modeToggle.textContent = rich ? root.dataset.labelSource : root.dataset.labelRich
+        }, delay)
     }
 
-    const commands = {
+    const changed = () => {
+        dirty = true
+        if (!richMode) renderPreview()
+    }
+    source.addEventListener('input', changed)
+
+    // --- Markdown helpers for the toolbar in source mode ---
+    const replaceSelection = (transform) => {
+        const { selectionStart: start, selectionEnd: end, value } = source
+        const { text, selectFrom, selectTo } = transform(value.slice(start, end))
+        source.setRangeText(text, start, end, 'end')
+        source.focus()
+        if (selectFrom !== undefined) source.setSelectionRange(start + selectFrom, start + selectTo)
+        source.dispatchEvent(new Event('input'))
+    }
+    const wrap = (before, after = before, placeholder = '') => replaceSelection((selected) => {
+        const inner = selected || placeholder
+        return { text: before + inner + after, selectFrom: before.length, selectTo: before.length + inner.length }
+    })
+    const prefixLines = (prefix) => {
+        const { value } = source
+        const lineStart = value.lastIndexOf('\n', source.selectionStart - 1) + 1
+        source.setSelectionRange(lineStart, source.selectionEnd)
+        replaceSelection((selected) => ({
+            text: (selected || '').split('\n').map((line, i) => (typeof prefix === 'function' ? prefix(i) : prefix) + line).join('\n'),
+        }))
+    }
+    const insertBlock = (block) => {
+        // Blocks go after the current line – never into selected text or inline markup.
+        const lineEnd = source.value.indexOf('\n', source.selectionEnd)
+        const position = lineEnd === -1 ? source.value.length : lineEnd
+        source.setSelectionRange(position, position)
+        insertAtCursor(block)
+    }
+    const insertAtCursor = (block) => replaceSelection(() => {
+        const before = source.value.slice(0, source.selectionStart)
+        const lead = before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n'
+        return { text: lead + block + '\n' }
+    })
+
+    const markdownCommands = {
+        bold: () => wrap('**', '**', 'text'),
+        italic: () => wrap('*', '*', 'text'),
+        strike: () => wrap('~~', '~~', 'text'),
+        code: () => wrap('`', '`', 'code'),
+        h2: () => prefixLines('## '),
+        h3: () => prefixLines('### '),
+        bulletList: () => prefixLines('- '),
+        orderedList: () => prefixLines((i) => `${i + 1}. `),
+        taskList: () => prefixLines('- [ ] '),
+        blockquote: () => prefixLines('> '),
+        codeBlock: () => wrap('```\n', '\n```', 'code'),
+        table: () => insertBlock('| Column 1 | Column 2 |\n| --- | --- |\n|  |  |'),
+        hr: () => insertBlock('---'),
+        toc: () => insertBlock('[TOC]'),
+        link: () => {
+            const url = window.prompt('URL', 'https://')
+            if (!url || !/^(https?:\/\/|mailto:|\/|#)/i.test(url)) return
+            wrap('[', `](${url})`, 'link')
+        },
+    }
+
+    // --- Optional rich text editor ---
+    const createEditor = () => new Editor({
+        element: mount,
+        extensions: [
+            StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
+            Markdown,
+            Table.configure({ resizable: false }),
+            TableRow,
+            TableHeader,
+            TableCell,
+            TaskList,
+            TaskItem.configure({ nested: true }),
+            Placeholder.configure({ placeholder: root.dataset.placeholder || '' }),
+        ],
+        content: '',
+    })
+
+    const richCommands = {
         bold: () => editor.chain().focus().toggleBold().run(),
         italic: () => editor.chain().focus().toggleItalic().run(),
         strike: () => editor.chain().focus().toggleStrike().run(),
@@ -102,47 +141,68 @@ export function mountEditor(root) {
         blockquote: () => editor.chain().focus().toggleBlockquote().run(),
         codeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
         hr: () => editor.chain().focus().setHorizontalRule().run(),
-        // "[TOC]" is replaced by a table of contents of the headings when the page is shown.
         toc: () => editor.chain().focus().insertContent({ type: 'paragraph', content: [{ type: 'text', text: '[TOC]' }] }).run(),
         table: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
         link: () => {
-            const previous = editor.getAttributes('link').href || ''
-            const url = window.prompt('URL', previous)
+            const url = window.prompt('URL', editor.getAttributes('link').href || '')
             if (url === null) return
             if (url === '') return editor.chain().focus().unsetLink().run()
-            // Only http(s), mailto and internal links.
             if (!/^(https?:\/\/|mailto:|\/|#)/i.test(url)) return
             editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
         },
     }
 
+    const setMode = (rich) => {
+        if (rich) {
+            if (!editor) {
+                try {
+                    editor = createEditor()
+                } catch (error) {
+                    console.warn('Rich editor could not start', error)
+                    return
+                }
+                editor.on('update', () => {
+                    if (richMode) {
+                        source.value = editor.getMarkdown()
+                        dirty = true
+                    }
+                })
+                // Paste Markdown text as formatted content.
+                mount.addEventListener('paste', (event) => {
+                    const text = event.clipboardData?.getData('text/plain')
+                    const html = event.clipboardData?.getData('text/html')
+                    if (text && !html && /(^|\n)(#{1,6} |[-*+] |\d+\. |> |```|\|.+\|)/.test(text)) {
+                        event.preventDefault()
+                        editor.chain().focus().insertContent(text, { contentType: 'markdown' }).run()
+                    }
+                }, true)
+            }
+            // Only load, never write back on switching: unchanged Markdown stays byte-identical.
+            editor.commands.setContent(source.value, { contentType: 'markdown', emitUpdate: false })
+        } else {
+            renderPreview(0)
+        }
+
+        richMode = rich
+        mount.hidden = !rich
+        sourcePane.hidden = rich
+        preview.hidden = rich
+        modeToggle.textContent = rich ? root.dataset.labelSource : root.dataset.labelRich
+        if (rich) editor.commands.focus('end')
+    }
+
     toolbar.addEventListener('click', (event) => {
         const button = event.target.closest('[data-cmd]')
-        if (button) commands[button.dataset.cmd]?.()
+        if (!button) return
+        const commands = richMode ? richCommands : markdownCommands
+        commands[button.dataset.cmd]?.()
     })
     modeToggle.addEventListener('click', () => setMode(!richMode))
 
-    form.addEventListener('submit', sync)
-    editor.on('update', sync)
-
-    // Paste Markdown text as formatted content.
-    mount.addEventListener('paste', (event) => {
-        const text = event.clipboardData?.getData('text/plain')
-        const html = event.clipboardData?.getData('text/html')
-        if (text && !html && /(^|\n)(#{1,6} |[-*+] |\d+\. |> |```|\|.+\|)/.test(text)) {
-            event.preventDefault()
-            editor.chain().focus().insertContent(text, { contentType: 'markdown' }).run()
-        }
-    }, true)
-
     // Warn before leaving with unsaved changes.
-    let dirty = false
-    editor.on('update', () => { dirty = true })
-    source.addEventListener('input', () => { dirty = true })
     form.addEventListener('submit', () => { dirty = false })
     window.addEventListener('beforeunload', (event) => { if (dirty) event.preventDefault() })
 
     toolbar.hidden = false
-    mount.hidden = false
-    sourcePane.hidden = true
+    setMode(false)
 }

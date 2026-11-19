@@ -24,8 +24,8 @@ class SpacesWidget implements DashboardWidget
 
     public function render(User $user): ?View
     {
-        $spaces = Space::query()->whereIn('id', $this->access->spaceIdsFor($user))->orderBy('name')->get();
+        $spaces = Space::query()->whereIn('id', $this->access->spaceIdsFor($user))->orderByRaw('lower(name)')->orderBy('id')->get();
 
-        return view('spaces.widget', ['spaces' => $spaces]);
+        return view('spaces.widget', ['spaces' => $spaces, 'limit' => 6]);
     }
 }

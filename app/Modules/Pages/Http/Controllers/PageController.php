@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class PageController
 {
@@ -63,6 +64,18 @@ class PageController
         Gate::authorize('view', $page);
 
         return redirect()->to($page->url());
+    }
+
+    /** Raw Markdown content, e.g. for "Copy page content". */
+    public function markdown(Page $page): Response
+    {
+        Gate::authorize('view', $page);
+
+        return response($page->content, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store',
+        ]);
     }
 
     /** /<space>/<title>-<id>; stale space or title parts are corrected by a redirect. */

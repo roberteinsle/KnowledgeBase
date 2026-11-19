@@ -12,6 +12,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <title>{{ $title ? $title.' · ' : '' }}{{ $workspace->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -21,7 +22,7 @@
 <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
     <div class="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4">
         <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2 font-semibold text-slate-900">
-            <span class="grid size-8 place-items-center rounded-md bg-indigo-600 text-white">{{ mb_substr($workspace->name, 0, 1) }}</span>
+            <img src="{{ asset('favicon.svg') }}" alt="" class="size-8">
             <span class="hidden sm:inline">{{ $workspace->name }}</span>
         </a>
 

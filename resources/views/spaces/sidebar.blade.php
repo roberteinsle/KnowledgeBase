@@ -1,6 +1,7 @@
-{{-- Space switcher (Spaces module) and the space links other modules register in the "space" menu. --}}
-<div class="border-b border-slate-200 pb-3">
-    @if ($current)
+{{-- Space switcher (Spaces module) and the space links other modules register in the "space" menu.
+     Outside a space (home, spaces list, account …) the sidebar lists all spaces instead. --}}
+@if ($current)
+    <div class="border-b border-slate-200 pb-3">
         <div class="relative" x-data="{ open: false, q: '' }" @keydown.escape.window="open = false">
             <button type="button" @click="open = !open; $nextTick(() => open && $refs.filter.focus())" :aria-expanded="open" aria-haspopup="listbox"
                     class="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-slate-100">
@@ -43,7 +44,34 @@
                 </a>
             @endforeach
         </nav>
-    @else
-        <p class="px-2 py-2 text-sm text-slate-500">{{ __('You do not have access to any space yet.') }}</p>
-    @endif
-</div>
+    </div>
+@else
+    <nav aria-label="{{ __('Spaces') }}" x-data="{ q: '' }">
+        <div class="mb-2 flex items-center justify-between px-2">
+            <h2 class="text-xs font-medium text-slate-500">{{ __('Spaces') }}</h2>
+            @can('create', \App\Modules\Spaces\Models\Space::class)
+                <a href="{{ route('filament.admin.resources.spaces.create') }}" title="{{ __('New space') }}"
+                   class="grid size-6 place-items-center rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100">
+                    <x-kb-icon name="plus" class="size-4" /><span class="sr-only">{{ __('New space') }}</span>
+                </a>
+            @endcan
+        </div>
+        @if ($spaces->isEmpty())
+            <p class="px-2 py-1 text-sm text-slate-500">{{ __('You do not have access to any space yet.') }}</p>
+        @else
+            @if ($spaces->count() > 8)
+                <label for="space-filter" class="sr-only">{{ __('Search spaces') }}</label>
+                <input id="space-filter" x-model="q" type="search" class="input mb-2" placeholder="{{ __('Search spaces') }}" autocomplete="off">
+            @endif
+            <ul class="space-y-0.5">
+                @foreach ($spaces as $space)
+                    <li x-show="q === '' || @js(mb_strtolower($space->name)).includes(q.toLowerCase())">
+                        <a href="{{ route('spaces.show', $space) }}" class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100">
+                            <x-space-icon :space="$space" size="size-5" /> <span class="truncate">{{ $space->name }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </nav>
+@endif

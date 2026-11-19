@@ -104,6 +104,7 @@ class PagesServiceProvider extends ServiceProvider
 
         // "⋮" of a page (id: page id)
         $menus->add('page', new MenuItem('copy-link', 'Copy link', 'link', fn ($id) => route('pages.show', $id), kind: MenuItem::COPY, order: 10));
+        $menus->add('page', new MenuItem('copy-content', 'Copy page content', 'duplicate', fn ($id) => route('pages.markdown', $id), kind: MenuItem::COPY_CONTENT, order: 15));
         $menus->add('page', new MenuItem('favorite', 'Add to favorites', 'star', fn ($id) => route('pages.favorite', $id), kind: MenuItem::POST, order: 20, activeLabel: 'Remove from favorites'));
         $menus->add('page', new MenuItem('duplicate', 'Duplicate', 'duplicate', fn ($id) => route('pages.duplicate', $id), kind: MenuItem::POST, order: 40, visible: $can(SpaceRole::Editor)));
         $menus->add('page', new MenuItem('move', 'Move', 'move', fn ($id) => route('pages.move', $id), order: 50, visible: $can(SpaceRole::Editor)));

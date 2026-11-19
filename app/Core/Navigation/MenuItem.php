@@ -21,9 +21,12 @@ final readonly class MenuItem
 
     public const COPY = 'copy';
 
+    /** Fetch the URL (text) and copy the response body to the clipboard. */
+    public const COPY_CONTENT = 'copy-content';
+
     /**
      * @param  string  $label  untranslated key
-     * @param  'link'|'post'|'delete'|'copy'  $kind  copy = copy the URL to the clipboard
+     * @param  'link'|'post'|'delete'|'copy'|'copy-content'  $kind  copy = copy the URL, copy-content = copy the text the URL returns
      * @param  Closure(int|string): string  $url  receives the subject id (or a placeholder)
      * @param  (Closure(User, object): bool)|null  $visible  receives the user and the context object
      * @param  string|null  $confirm  untranslated confirmation question

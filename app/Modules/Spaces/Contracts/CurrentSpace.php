@@ -8,10 +8,10 @@ use Closure;
 use Illuminate\Http\Request;
 
 /**
- * The space the user is working in: explicitly set, or found by a resolver
- * from the current route (modules register resolvers for their own route
- * parameters), otherwise the last visited readable space, otherwise the first
- * readable space. Drives the sidebar.
+ * The space the request is about: explicitly set, or found by a resolver from
+ * the current route (modules register resolvers for their own route
+ * parameters). Null outside a space (home, spaces list, account …). Drives
+ * the sidebar.
  */
 interface CurrentSpace
 {

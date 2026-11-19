@@ -92,6 +92,18 @@ function initMenu(tree) {
 
     document.addEventListener('click', (event) => {
         if (!menu) return
+        const fetchCopy = event.target.closest('[data-copy-fetch]')
+        if (fetchCopy && menu.contains(fetchCopy)) {
+            fetch(fetchCopy.dataset.copyFetch, { headers: { Accept: 'text/plain' } })
+                .then((response) => (response.ok ? response.text() : Promise.reject(response.status)))
+                .then((text) => navigator.clipboard.writeText(text))
+                .then(() => {
+                    fetchCopy.lastChild.textContent = ` ${tree.dataset.contentCopiedLabel}`
+                    setTimeout(close, 800)
+                })
+                .catch((error) => console.warn('Copy failed', error))
+            return
+        }
         const copy = event.target.closest('[data-copy-url]')
         if (copy && menu.contains(copy)) {
             // The readable URL of the page; the permalink from the template is the fallback.

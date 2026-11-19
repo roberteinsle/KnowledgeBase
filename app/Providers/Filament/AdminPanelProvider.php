@@ -40,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName(fn () => Workspace::current()->name.' · '.__('Administration'))
             ->colors(['primary' => Color::Indigo])
+            ->favicon(fn () => asset('favicon.svg'))
             ->userMenuItems([
                 Action::make('knowledgebase')
                     ->label(fn () => __('Back to the knowledge base'))

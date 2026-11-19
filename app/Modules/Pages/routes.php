@@ -30,6 +30,7 @@ Route::post('/pages/{page}/place', [PageTreeController::class, 'place'])->whereN
 Route::post('/pages/{page}/duplicate', [PageCopyController::class, 'duplicate'])->whereNumber('page')->name('pages.duplicate');
 Route::get('/pages/{page}/copy', [PageCopyController::class, 'create'])->whereNumber('page')->name('pages.copy');
 Route::post('/pages/{page}/copy', [PageCopyController::class, 'store'])->whereNumber('page')->name('pages.copy.store');
+Route::get('/pages/{page}/markdown', [PageController::class, 'markdown'])->whereNumber('page')->name('pages.markdown');
 Route::post('/pages/{page}/favorite', [FavoriteController::class, 'toggle'])->whereNumber('page')->name('pages.favorite');
 
 Route::get('/pages/{page}/versions', [PageVersionController::class, 'index'])->whereNumber('page')->name('pages.versions');

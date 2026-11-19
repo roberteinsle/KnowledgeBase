@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <meta name="referrer" content="no-referrer">
     <title>{{ $title ? $title.' · ' : '' }}{{ $workspace->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -13,7 +14,7 @@
 <body class="flex min-h-full flex-col items-center justify-center px-4 py-12 text-slate-900 antialiased">
     <div class="w-full max-w-sm">
         <div class="mb-8 flex flex-col items-center gap-3">
-            <span class="grid size-12 place-items-center rounded-xl bg-indigo-600 text-xl font-semibold text-white">{{ mb_substr($workspace->name, 0, 1) }}</span>
+            <img src="{{ asset('favicon.svg') }}" alt="" class="size-12">
             <h1 class="text-xl font-semibold">{{ $workspace->name }}</h1>
         </div>
 

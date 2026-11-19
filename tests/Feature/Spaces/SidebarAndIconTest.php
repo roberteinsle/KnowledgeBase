@@ -25,14 +25,20 @@ it('shows the space switcher with readable spaces only and the page tree', funct
         ->assertSee('/search?space='.$mine->slug, false);
 });
 
-it('remembers the last space for pages outside a space', function () {
+it('lists all spaces instead of a page tree outside a space', function () {
     $user = member();
-    space([[$user, SpaceRole::Reader]], ['name' => 'Aaa erster']);
-    $second = space([[$user, SpaceRole::Reader]], ['name' => 'Zzz zweiter']);
-    page($second, ['title' => 'Seite im zweiten']);
+    space([[$user, SpaceRole::Reader]], ['name' => 'Zebra']);
+    $second = space([[$user, SpaceRole::Reader]], ['name' => 'alpha']);
+    page($second, ['title' => 'Seite im Bereich']);
 
-    $this->actingAs($user)->get(route('spaces.show', $second));
-    $this->actingAs($user)->get('/account')->assertSee('Seite im zweiten');
+    // Visiting a space must not make it "stick" on pages outside a space.
+    $this->actingAs($user)->get(route('spaces.show', $second))->assertSee('Seite im Bereich');
+
+    foreach (['/', '/spaces', '/account'] as $url) {
+        $this->actingAs($user)->get($url)
+            ->assertDontSee('data-page-tree', false)
+            ->assertSeeInOrder(['alpha', 'Zebra']);
+    }
 });
 
 it('shows editing actions in the tree only to editors', function () {

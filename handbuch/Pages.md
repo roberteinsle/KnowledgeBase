@@ -27,6 +27,7 @@ Sub-pages move along. A page cannot be dragged into its own sub-pages. On a phon
 | Entry | Effect | Role |
 |---|---|---|
 | Copy link | copies the address of the page | Reader |
+| Copy page content | copies the Markdown content of the page | Reader |
 | Add to / Remove from favorites | the page appears under *Favorites* on the home page | Reader |
 | This page as Markdown / HTML / with sub-pages as ZIP | export (see [Import and Export](Import-and-Export.md)) | Reader |
 | Duplicate | copy with sub-pages, labels and attachments right below the original, title with "(copy)" | Editor |
@@ -50,17 +51,15 @@ You need at least the role **Editor** in the space (see [Spaces, Groups and Perm
 
 ## Writing
 
-The editor shows formatted text, but the page is stored as **Markdown**. This keeps import, export and version comparison lossless.
+Pages are stored as **Markdown**. This keeps import, export and version comparison lossless.
 
-- Toolbar: bold, italic, strikethrough, code, headings, lists, task lists, quote, code block, table, link, divider, table of contents.
-- Markdown shortcuts work while typing: `# ` for headings, `- ` for lists, `1. ` for numbered lists, `> ` for quotes, ` ``` ` for code.
-- Pasting Markdown text (e.g. from another tool) turns it into formatting directly.
+**Edit** opens the Markdown editor: the source on the left and a **live preview** on the right (on narrow screens below each other). The preview updates while you type and looks exactly like the saved page.
+
+- Toolbar: bold, italic, strikethrough, code, headings, lists, task lists, quote, code block, table, link, divider, table of contents. In the Markdown editor the buttons insert the Markdown syntax at the cursor or around the selected text; blocks such as tables or the table of contents go below the current line.
+- **Editor** (on the right of the toolbar) switches to formatted editing without Markdown syntax; **Markdown** switches back. Switching alone never changes the content.
+- In the formatted editor Markdown shortcuts work while typing (`# `, `- `, `1. `, `> `, ` ``` `), and pasted Markdown text turns into formatting directly.
 - Without JavaScript a plain Markdown text field appears.
 - On the page, every code block has a **Copy** button in its top right corner that copies the code to the clipboard.
-
-### Markdown with live preview
-
-**Markdown** (on the right of the toolbar) switches to the Markdown source. On wide screens the source is on the left and a **live preview** on the right; it updates while you type and looks exactly like the saved page. **Editor** switches back to formatted editing.
 
 HTML in the text is not executed for security reasons but shown as text. Links with `javascript:` are removed.
 

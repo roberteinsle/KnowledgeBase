@@ -1,7 +1,7 @@
 {{-- Page tree of the current space (Pages module). Menu entries come from the MenuRegistry. --}}
 <div class="pt-3" data-page-tree data-space-id="{{ $space->id }}"
      @if ($canReorder) data-place-url="{{ route('pages.place', '__PAGE__') }}" @endif
-     data-copied-label="{{ __('Link copied') }}" data-move-error="{{ __('The page could not be moved.') }}">
+     data-copied-label="{{ __('Link copied') }}" data-content-copied-label="{{ __('Content copied') }}" data-move-error="{{ __('The page could not be moved.') }}">
     <div class="mb-1 flex items-center justify-between px-2">
         <h2 class="text-xs font-medium text-slate-500">{{ __('Pages') }}</h2>
         <div class="flex items-center gap-1">
@@ -51,6 +51,11 @@
                 @switch($item->kind)
                     @case(\App\Core\Navigation\MenuItem::COPY)
                         <button type="button" role="menuitem" data-copy-url="{{ url($url) }}" class="{{ $classes }}">
+                            <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" /> {{ __($item->label) }}
+                        </button>
+                        @break
+                    @case(\App\Core\Navigation\MenuItem::COPY_CONTENT)
+                        <button type="button" role="menuitem" data-copy-fetch="{{ $url }}" class="{{ $classes }}">
                             <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" /> {{ __($item->label) }}
                         </button>
                         @break

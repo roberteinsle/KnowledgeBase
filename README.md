@@ -1,8 +1,6 @@
 <div align="center">
-<img src="docs/logo.svg" width="110" alt="Knowledgebase"/>
 
-# Knowledgebase
-### The self-hosted knowledge base for teams
+![Knowledgebase – the self-hosted knowledge base for teams](docs/knowledgebase-social-preview.png)
 
 [![Wiki](https://img.shields.io/badge/Docs-Wiki-1b2645)](../../wiki)
 [![Releases](https://img.shields.io/badge/Releases-GitHub-4f46e5)](../../releases)
@@ -13,7 +11,7 @@
 
 ---
 
-Knowledgebase keeps your team's documentation in one place: **spaces** for teams and projects, nested **pages** written in a rich editor that stores plain **Markdown**, version history, full-text search, import from Obsidian, Notion or any Markdown files and an MCP server for AI assistants like Claude – on your own server. Sign-in works without passwords, via passkey or e-mail link.
+Knowledgebase keeps your team's documentation in one place: **spaces** for teams and projects, nested **pages** written in **Markdown** with live preview (or a rich text editor), version history, full-text search, import from Obsidian, Notion or any Markdown files and an MCP server for AI assistants like Claude – on your own server. Sign-in works without passwords, via passkey or e-mail link.
 
 ## Quick start
 
@@ -30,7 +28,7 @@ Updates are a new image tag; the database is migrated automatically on start.
 | | |
 |---|---|
 | [**Spaces & permissions**](../../wiki/Spaces-Groups-and-Permissions) | Spaces with icon, roles Reader / Editor / Space admin for users and groups |
-| [**Pages**](../../wiki/Pages) | Page tree with drag & drop, rich editor on Markdown with live preview, table of contents, labels, attachments, favorites, trash |
+| [**Pages**](../../wiki/Pages) | Page tree with drag & drop, Markdown editor with live preview, table of contents, labels, attachments, favorites, trash |
 | [**Version history**](../../wiki/Pages#version-history) | Every change is a version – compare, restore, no silent overwrites |
 | [**Import & export**](../../wiki/Import-and-Export) | Markdown files, ZIP archives (Obsidian, Notion), copy & paste; export as Markdown, HTML or ZIP |
 | [**Search**](../../wiki/Search) | Full-text search over pages and attachments, per space or everywhere |

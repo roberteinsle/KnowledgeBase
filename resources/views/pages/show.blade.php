@@ -31,6 +31,12 @@
                                 <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" />
                                 <span x-text="done ? @js(__('Link copied')) : @js(__($item->label))">{{ __($item->label) }}</span>
                             </button>
+                        @elseif ($item->kind === \App\Core\Navigation\MenuItem::COPY_CONTENT)
+                            <button type="button" role="menuitem" class="{{ $classes }}" x-data="{ done: false }"
+                                    @click="fetch(@js($url), { headers: { Accept: 'text/plain' } }).then((r) => r.text()).then((t) => navigator.clipboard.writeText(t)).then(() => done = true)">
+                                <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" />
+                                <span x-text="done ? @js(__('Content copied')) : @js(__($item->label))">{{ __($item->label) }}</span>
+                            </button>
                         @elseif (in_array($item->kind, [\App\Core\Navigation\MenuItem::POST, \App\Core\Navigation\MenuItem::DELETE], true))
                             <form method="post" action="{{ $url }}" @if ($item->confirm) data-confirm="{{ __($item->confirm) }}" @endif>
                                 @csrf

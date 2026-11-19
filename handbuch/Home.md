@@ -29,9 +29,9 @@ Knowledgebase is a self-hosted knowledge base for teams: documentation organised
 ## Navigation
 
 - **Header:** logo and *Home* on the left, search in the middle (key <kbd>/</kbd>), account menu on the right.
-- **Left sidebar:** the **space switcher** at the top (with a search field), below it *Overview*, *Search* (this space only), *Space settings* (administrators) and *New page*, followed by the **page tree** of the space. Outside a space the sidebar shows the space visited last.
+- **Left sidebar:** inside a space the **space switcher** at the top (with a search field), below it *Overview*, *Search* (this space only), *Space settings* (administrators) and *New page*, followed by the **page tree** of the space. Outside a space (home page, spaces list, account, search) the sidebar lists all your spaces.
 - **Phone:** a tab bar at the bottom (Home, Spaces, Search, Account); the sidebar opens via **Spaces and pages**.
-- **Home page and space overview:** tabs *Recently updated*, *Favorites* and *Created by me*.
+- **Home page:** tabs *Recently updated*, *Favorites* and *Created by me*, and *Your spaces* sorted A–Z – the first six, the rest via **Show all spaces**. The space overview shows the same tabs for one space.
 
 ## Addresses
 
