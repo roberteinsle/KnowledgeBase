@@ -5,6 +5,7 @@ Knowledgebase is a self-hosted knowledge base for teams: documentation organised
 ## For users
 
 - [Sign-in](Sign-in.md) – passkeys, e-mail sign-in links, authenticator app
+- [Account](Account.md) – profile picture, name, language
 - [Pages](Pages.md) – writing, page tree, drag & drop, table of contents, versions, labels, attachments, trash
 - [Import and Export](Import-and-Export.md) – Markdown files, ZIP archives (Obsidian, Notion), copy & paste, HTML, backups
 - [Search](Search.md)

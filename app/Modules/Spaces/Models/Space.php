@@ -28,7 +28,7 @@ class Space extends Model
      * first path segment the system uses itself (including former German paths).
      */
     public const RESERVED_SLUGS = [
-        'account', 'admin', 'api', 'assets', 'attachments', 'build', 'confirm', 'css', 'docs', 'filament', 'fonts',
+        'account', 'admin', 'api', 'assets', 'attachments', 'avatars', 'build', 'confirm', 'css', 'docs', 'filament', 'fonts',
         'help', 'js', 'labels', 'livewire', 'locale', 'login', 'logout', 'new', 'pages', 'passkeys', 'search',
         'spaces', 'storage', 'trash', 'up', 'user', 'vendor',
         'abmelden', 'anhaenge', 'anmelden', 'bereiche', 'bestaetigen', 'konto', 'papierkorb', 'seiten', 'sprache', 'suche',
@@ -45,23 +45,10 @@ class Space extends Model
         return $this->icon_path !== null && $this->icon_path !== '';
     }
 
-    /** Two letters for the fallback badge, e.g. "Human Resources" → "HR". */
-    public function initials(): string
+    /** Icon image URL (upload, else generated avatar with emoji or initials). */
+    public function iconUrl(): string
     {
-        $words = preg_split('/[\s\-_]+/u', trim($this->name), -1, PREG_SPLIT_NO_EMPTY) ?: ['?'];
-        $letters = count($words) > 1
-            ? mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1)
-            : mb_substr($words[0], 0, 2);
-
-        return mb_strtoupper($letters);
-    }
-
-    /** Stable colour for the initials badge. */
-    public function badgeColor(): string
-    {
-        $colors = ['bg-red-700', 'bg-purple-700', 'bg-indigo-700', 'bg-sky-700', 'bg-teal-700', 'bg-emerald-700', 'bg-amber-700', 'bg-rose-700', 'bg-slate-700'];
-
-        return $colors[crc32($this->name) % count($colors)];
+        return route('spaces.icon', $this).'?v='.$this->updated_at->timestamp;
     }
 
     public function getRouteKeyName(): string

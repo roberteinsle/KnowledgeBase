@@ -114,11 +114,11 @@ class SpaceResource extends Resource
             ->columns([
                 // The app's own icon route (with permission check), not a storage URL.
                 ImageColumn::make('icon_image')->label(__('Icon'))
-                    ->state(fn (Space $record) => $record->hasImage() ? route('spaces.icon', $record).'?v='.$record->updated_at->timestamp : null)
+                    ->state(fn (Space $record) => $record->iconUrl())
                     ->circular()
                     ->imageSize(32),
-                TextColumn::make('name')->label(__('Name'))->searchable()->sortable()
-                    ->formatStateUsing(fn (string $state, Space $record) => trim(($record->hasImage() ? '' : ($record->icon ?? '')).' '.$state)),
+                TextColumn::make('name')->label(__('Name'))->searchable()->sortable(),
+
                 TextColumn::make('slug')->label(__('URL name')),
                 TextColumn::make('permissions_count')->label(__('Permissions'))->counts('permissions'),
             ])

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Modules\Groups\Models\Group;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ use Laravel\Passkeys\PasskeyAuthenticatable;
  * @property string $email
  * @property string $role
  * @property string|null $locale
+ * @property string|null $avatar_path
  * @property bool $is_active
  * @property string|null $totp_secret
  * @property list<string>|null $totp_recovery_codes
@@ -28,7 +30,7 @@ use Laravel\Passkeys\PasskeyAuthenticatable;
  * @property Carbon|null $last_login_at
  * @property Carbon $created_at
  */
-class User extends Authenticatable implements FilamentUser, PasskeyUser
+class User extends Authenticatable implements FilamentUser, HasAvatar, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable;
@@ -40,7 +42,7 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     /** Role, activation and 2FA fields are internal: set them with forceFill(). */
     protected $fillable = ['name', 'email', 'locale'];
 
-    protected $hidden = ['remember_token', 'totp_secret', 'totp_recovery_codes'];
+    protected $hidden = ['remember_token', 'totp_secret', 'totp_recovery_codes', 'avatar_path'];
 
     protected function casts(): array
     {
@@ -72,6 +74,17 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
     public function hasTotp(): bool
     {
         return $this->totp_confirmed_at !== null && $this->totp_secret !== null;
+    }
+
+    /** Profile picture, or a generated initials avatar – always a same-origin URL. */
+    public function avatarUrl(): string
+    {
+        return route('avatars.user', ['user' => $this->id, 'v' => $this->updated_at?->timestamp]);
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatarUrl();
     }
 
     public function canAccessPanel(Panel $panel): bool

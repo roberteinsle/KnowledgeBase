@@ -127,9 +127,12 @@ it('shows the space icon in the admin table via the protected icon route', funct
     $this->actingAs($admin)->get('/admin/spaces')
         ->assertOk()
         ->assertSee(route('spaces.icon', $withImage), false)
-        ->assertSee('🚀');
+        ->assertSee(route('spaces.icon', Space::where('name', 'Ohne Bild')->sole()), false);
 });
 
-it('never loads avatars from an external service in the admin area', function () {
-    $this->actingAs(admin())->get('/admin')->assertOk()->assertDontSee('ui-avatars.com')->assertSee('data:image/svg+xml;base64,', false);
+it('shows avatars from the app itself in the admin area, never from an external service', function () {
+    $admin = admin();
+
+    $this->actingAs($admin)->get('/admin')->assertOk()->assertDontSee('ui-avatars.com')->assertSee(route('avatars.user', $admin->id), false);
+    $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee(route('avatars.user', $admin->id), false);
 });

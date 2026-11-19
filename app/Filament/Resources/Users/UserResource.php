@@ -24,6 +24,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -81,6 +82,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('avatar')->label('')
+                    ->state(fn (User $record) => $record->avatarUrl())
+                    ->circular()
+                    ->imageSize(32),
                 TextColumn::make('name')->label(__('Name'))->searchable()->sortable(),
                 TextColumn::make('email')->label(__('E-mail'))->searchable()->sortable(),
                 TextColumn::make('role')->label(__('Role'))->badge()

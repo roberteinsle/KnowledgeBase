@@ -6,7 +6,7 @@
 - GitHub Actions tests, builds the Docker image and pushes it to `ghcr.io/<owner>/knowledgebase`. Coolify only pulls the finished image (`deploy/docker-compose.coolify.yml`).
 - PostgreSQL is a separate Coolify resource.
 - Migrations run when the container starts.
-- Attachments and space icons are stored in the volume `app-storage` (`storage/app/private`).
+- Attachments, space icons and profile pictures are stored in the volume `app-storage` (`storage/app/private`).
 
 ## Environment variables
 
@@ -57,7 +57,7 @@ As the app is only reachable through the proxy, it trusts the forwarded visitor 
 ## Backup
 
 - **Database:** with the backup function of the PostgreSQL resource in Coolify.
-- **Attachments and icons:** back up the volume `app-storage`.
+- **Attachments, icons and profile pictures:** back up the volume `app-storage`.
 - **Content as Markdown:** per space **Export** → ZIP. The archive can be imported into any installation (see [Import and Export](Import-and-Export.md)).
 
 ## Updates and rollback
@@ -69,7 +69,7 @@ Every push to `main` triggers tests, the image build and the redeploy; the image
 - Sign-in links: 32 bytes of randomness, stored only as SHA-256 hash, valid for 15 minutes, single use.
 - Two-factor secrets and recovery codes are stored encrypted.
 - Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
-- Attachments and space icons on a private disk, delivered only after a permission check; only PDFs and raster images inline.
+- Attachments, space icons and profile pictures on a private disk, delivered only after a permission check; only PDFs and raster images inline. Uploaded avatars are delivered only if their content really is a raster image.
 - Markdown is rendered with escaped HTML; unsafe links are removed.
 - No external resources (fonts, CDNs, avatar services) – everything is served by the app itself; avatars in the administration area are generated locally.
 - The Content Security Policy only allows the app's own origin; `blob:` workers are allowed for image processing during uploads.

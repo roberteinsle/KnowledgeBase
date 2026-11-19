@@ -12,7 +12,9 @@ Deleting a space removes all its pages, versions and attachments permanently.
 
 - **Upload an image:** PNG, JPG, WebP or GIF up to 1 MB; it is shown square (image editor in the form). SVG is not allowed for security reasons. Only users who may read the space see the image.
 - **Emoji:** used when no image is uploaded.
-- Without either the app shows a coloured circle with the initials ("Human Resources" becomes "HR").
+- Without either the app generates an **avatar from the name**: the initials on a coloured background ("Human Resources" becomes "HR"), the same style as user avatars.
+
+The icon is shown in the space switcher, on the space overview, in lists and in the space table of the administration.
 
 ## Roles in a space
 

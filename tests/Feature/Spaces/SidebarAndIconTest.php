@@ -71,12 +71,14 @@ it('serves the space icon only to users who can read the space', function () {
     $this->actingAs($user)->get(route('spaces.show', $space))->assertSee(route('spaces.icon', $space), false);
 });
 
-it('refuses non-raster files as space icon', function () {
+it('never delivers a non-raster file as space icon', function () {
     $user = member();
     Storage::disk('local')->put('space-icons/x.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
-    $space = space([[$user, SpaceRole::Reader]], ['icon_path' => 'space-icons/x.svg']);
+    $space = space([[$user, SpaceRole::Reader]], ['name' => 'Gefährlich', 'icon_path' => 'space-icons/x.svg']);
 
-    $this->actingAs($user)->get(route('spaces.icon', $space))->assertNotFound();
+    // Falls back to the generated avatar instead of the uploaded content.
+    $response = $this->actingAs($user)->get(route('spaces.icon', $space))->assertOk();
+    expect($response->getContent())->not->toContain('<script')->toContain('>GE<');
 });
 
 it('removes the old icon file when it is replaced or the space is deleted', function () {
@@ -92,12 +94,15 @@ it('removes the old icon file when it is replaced or the space is deleted', func
     Storage::disk('local')->assertMissing('space-icons/new.png');
 });
 
-it('falls back to emoji and initials', function () {
+it('generates an avatar from the emoji or the initials of the name', function () {
     $user = member();
     $emoji = space([[$user, SpaceRole::Reader]], ['name' => 'Mit Emoji', 'icon' => '🚀']);
-    space([[$user, SpaceRole::Reader]], ['name' => 'Human Resources']);
+    $plain = space([[$user, SpaceRole::Reader]], ['name' => 'Human Resources']);
 
-    $this->actingAs($user)->get(route('spaces.show', $emoji))->assertSee('🚀')->assertSee('>HR<', false);
+    $this->actingAs($user)->get(route('spaces.icon', $emoji))
+        ->assertOk()->assertHeader('Content-Type', 'image/svg+xml; charset=UTF-8')->assertSee('🚀');
+    $this->actingAs($user)->get(route('spaces.icon', $plain))->assertOk()->assertSee('>HR<', false);
+    $this->actingAs($user)->get(route('spaces.show', $plain))->assertSee(route('spaces.icon', $plain), false);
 });
 
 it('restricts the search to one space', function () {

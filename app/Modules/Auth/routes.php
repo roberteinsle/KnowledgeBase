@@ -2,6 +2,7 @@
 
 use App\Core\Http\LegacyRedirects;
 use App\Modules\Auth\Http\Controllers\AccountController;
+use App\Modules\Auth\Http\Controllers\AvatarController;
 use App\Modules\Auth\Http\Controllers\ConfirmController;
 use App\Modules\Auth\Http\Controllers\LoginController;
 use App\Modules\Auth\Http\Controllers\MagicLinkController;
@@ -51,6 +52,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('account')->group(function () {
         Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
         Route::put('/account', [AccountController::class, 'update'])->name('account.update');
+        Route::post('/account/avatar', [AvatarController::class, 'store'])->middleware('throttle:uploads')->name('account.avatar.store');
+        Route::delete('/account/avatar', [AvatarController::class, 'destroy'])->name('account.avatar.destroy');
+        Route::get('/avatars/users/{user}', [AvatarController::class, 'show'])->whereNumber('user')->name('avatars.user');
     });
 });
 

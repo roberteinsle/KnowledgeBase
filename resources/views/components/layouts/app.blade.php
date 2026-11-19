@@ -49,7 +49,7 @@
         <div class="ml-auto md:ml-0" x-data="{ open: false }" @keydown.escape.window="open = false">
             <button type="button" @click="open = !open" :aria-expanded="open" aria-haspopup="menu"
                     class="flex items-center gap-2 rounded-full p-1 pr-2 text-sm text-slate-700 hover:bg-slate-100">
-                <span class="grid size-8 place-items-center rounded-full bg-slate-200 font-medium">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
+                <img src="{{ $user->avatarUrl() }}" alt="" class="size-8 rounded-full object-cover">
                 <span class="hidden max-w-40 truncate lg:inline">{{ $user->name }}</span>
                 <x-kb-icon name="chevron-down" class="size-4" />
             </button>

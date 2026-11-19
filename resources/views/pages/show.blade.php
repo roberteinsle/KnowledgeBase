@@ -49,7 +49,10 @@
         </div>
     </div>
 
-    <p class="mb-6 text-sm text-slate-500">
+    <p class="mb-6 flex items-center gap-2 text-sm text-slate-500">
+        @if ($page->editor)
+            <img src="{{ $page->editor->avatarUrl() }}" alt="" class="size-5 rounded-full object-cover">
+        @endif
         {{ __('Version :version · last changed :date by :name', [
             'version' => $page->version,
             'date' => \App\Core\Support\Dates::display($page->updated_at),
