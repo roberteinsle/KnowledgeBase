@@ -35,6 +35,15 @@ initPasskeys()
 initPageTrees()
 initCodeCopy()
 
+// Inline editing: a click into the page text (not on links or buttons) swaps
+// it for the editor. The editor bundle is only loaded then.
+document.addEventListener('click', (event) => {
+    const article = event.target.closest?.('[data-inline-edit]')
+    if (!article || article.hidden || event.target.closest('a, button, input, summary, .kb-code button')) return
+    if (window.getSelection()?.toString()) return // selecting text to copy is not editing
+    import('./inline-editor').then(({ startInlineEdit }) => startInlineEdit(article, event))
+})
+
 // The editor bundle is only loaded where it is needed.
 const editorElement = document.querySelector('[data-editor]')
 if (editorElement) {

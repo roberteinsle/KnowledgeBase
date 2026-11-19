@@ -2,12 +2,18 @@
 
 namespace App\Modules\Auth;
 
+use App\Core\Activity\Activity;
 use App\Core\Activity\ActivityLogger;
+use App\Core\Admin\AdminMetric;
+use App\Core\Admin\AdminMetricRegistry;
+use App\Core\Admin\Checks\CoreHealthChecks;
+use App\Core\Admin\HealthCheckRegistry;
 use App\Core\Navigation\NavigationItem;
 use App\Core\Navigation\NavigationRegistry;
 use App\Models\User;
 use App\Modules\Auth\Services\LoginService;
 use App\Modules\Auth\Services\MagicLinkService;
+use App\Modules\Auth\Services\MailCheckService;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -27,6 +33,19 @@ class AuthServiceProvider extends ServiceProvider
         Route::middleware('web')->group(__DIR__.'/routes.php');
 
         $this->configureRateLimits();
+
+        $this->app->make(AdminMetricRegistry::class)->add(new AdminMetric(
+            key: 'sign-in',
+            label: 'Sign-ins (7 days)',
+            value: fn () => Activity::query()->where('action', 'auth.login')->where('created_at', '>=', now()->subDays(7))->count(),
+            icon: 'heroicon-o-key',
+            order: 70,
+            description: fn () => __(':passkeys with passkey · :totp with authenticator app', [
+                'passkeys' => User::query()->whereHas('passkeys')->count(),
+                'totp' => User::query()->whereNotNull('totp_confirmed_at')->count(),
+            ]),
+        ));
+        $this->app->make(HealthCheckRegistry::class)->add(CoreHealthChecks::make('mail', 'E-mail (SMTP)', 40, fn () => $this->app->make(MailCheckService::class)->status()));
 
         Passkeys::authorizeLoginUsing(function (Request $request, PasskeyUser $user, Passkey $passkey): bool {
             if (! $user instanceof User || ! $user->is_active) {

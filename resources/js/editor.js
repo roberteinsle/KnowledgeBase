@@ -1,9 +1,4 @@
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import { Markdown } from '@tiptap/markdown'
-import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table'
-import { TaskList, TaskItem } from '@tiptap/extension-list'
-import { Placeholder } from '@tiptap/extensions'
+import { createRichEditor, markdownOf, slashLabelsFrom } from './tiptap'
 
 /**
  * Page editor. Opens in the Markdown source with a live preview; the rich
@@ -21,6 +16,8 @@ export function mountEditor(root) {
     let editor = null
     let richMode = false
     let dirty = false
+    // Placeholders for empty lines/selections, translated by the page.
+    const L = { text: 'text', code: 'code', heading: 'Heading', item: 'Item', quote: 'Quote', link: 'link', ...JSON.parse(root.dataset.placeholders || '{}') }
 
     // --- Live preview, rendered by the server (same renderer as the page) ---
     let previewTimer = null
@@ -68,64 +65,73 @@ export function mountEditor(root) {
         const inner = selected || placeholder
         return { text: before + inner + after, selectFrom: before.length, selectTo: before.length + inner.length }
     })
-    const prefixLines = (prefix) => {
+    // Prefix the current line(s); an empty line gets a selected placeholder,
+    // otherwise an empty "## " or "> " would not show up in the preview.
+    const prefixLines = (prefix, placeholder) => {
         const { value } = source
         const lineStart = value.lastIndexOf('\n', source.selectionStart - 1) + 1
-        source.setSelectionRange(lineStart, source.selectionEnd)
-        replaceSelection((selected) => ({
-            text: (selected || '').split('\n').map((line, i) => (typeof prefix === 'function' ? prefix(i) : prefix) + line).join('\n'),
-        }))
+        const lineEndIndex = value.indexOf('\n', source.selectionEnd)
+        const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex
+        source.setSelectionRange(lineStart, lineEnd)
+        const prefixFor = (i) => (typeof prefix === 'function' ? prefix(i) : prefix)
+        replaceSelection((selected) => {
+            if ((selected || '').trim() === '') {
+                return { text: prefixFor(0) + placeholder, selectFrom: prefixFor(0).length, selectTo: prefixFor(0).length + placeholder.length }
+            }
+            return { text: selected.split('\n').map((line, i) => prefixFor(i) + line).join('\n') }
+        })
     }
-    const insertBlock = (block) => {
+    const insertBlock = (block, select = null) => {
         // Blocks go after the current line – never into selected text or inline markup.
         const lineEnd = source.value.indexOf('\n', source.selectionEnd)
         const position = lineEnd === -1 ? source.value.length : lineEnd
         source.setSelectionRange(position, position)
-        insertAtCursor(block)
+        insertAtCursor(block, select)
     }
-    const insertAtCursor = (block) => replaceSelection(() => {
+    const insertAtCursor = (block, select = null) => replaceSelection(() => {
         const before = source.value.slice(0, source.selectionStart)
         const lead = before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n'
-        return { text: lead + block + '\n' }
+        const at = select !== null ? block.indexOf(select) : -1
+        return at === -1
+            ? { text: lead + block + '\n' }
+            : { text: lead + block + '\n', selectFrom: lead.length + at, selectTo: lead.length + at + select.length }
     })
+    // Code block on lines of its own (fences inside a line are no code block).
+    const codeBlock = () => {
+        const selected = source.value.slice(source.selectionStart, source.selectionEnd)
+        if (selected.trim() !== '') {
+            replaceSelection((text) => ({ text: '\n```\n' + text.replace(/^\n+|\n+$/g, '') + '\n```\n' }))
+            return
+        }
+        insertBlock('```\n' + L.code + '\n```', L.code)
+    }
 
     const markdownCommands = {
-        bold: () => wrap('**', '**', 'text'),
-        italic: () => wrap('*', '*', 'text'),
-        strike: () => wrap('~~', '~~', 'text'),
-        code: () => wrap('`', '`', 'code'),
-        h2: () => prefixLines('## '),
-        h3: () => prefixLines('### '),
-        bulletList: () => prefixLines('- '),
-        orderedList: () => prefixLines((i) => `${i + 1}. `),
-        taskList: () => prefixLines('- [ ] '),
-        blockquote: () => prefixLines('> '),
-        codeBlock: () => wrap('```\n', '\n```', 'code'),
+        bold: () => wrap('**', '**', L.text),
+        italic: () => wrap('*', '*', L.text),
+        strike: () => wrap('~~', '~~', L.text),
+        code: () => wrap('`', '`', L.code),
+        h2: () => prefixLines('## ', L.heading),
+        h3: () => prefixLines('### ', L.heading),
+        bulletList: () => prefixLines('- ', L.item),
+        orderedList: () => prefixLines((i) => `${i + 1}. `, L.item),
+        taskList: () => prefixLines('- [ ] ', L.item),
+        blockquote: () => prefixLines('> ', L.quote),
+        codeBlock,
         table: () => insertBlock('| Column 1 | Column 2 |\n| --- | --- |\n|  |  |'),
         hr: () => insertBlock('---'),
         toc: () => insertBlock('[TOC]'),
         link: () => {
             const url = window.prompt('URL', 'https://')
             if (!url || !/^(https?:\/\/|mailto:|\/|#)/i.test(url)) return
-            wrap('[', `](${url})`, 'link')
+            wrap('[', `](${url})`, L.link)
         },
     }
 
-    // --- Optional rich text editor ---
-    const createEditor = () => new Editor({
-        element: mount,
-        extensions: [
-            StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
-            Markdown,
-            Table.configure({ resizable: false }),
-            TableRow,
-            TableHeader,
-            TableCell,
-            TaskList,
-            TaskItem.configure({ nested: true }),
-            Placeholder.configure({ placeholder: root.dataset.placeholder || '' }),
-        ],
-        content: '',
+    // --- Optional rich text editor (with "/" commands) ---
+    const createEditor = () => createRichEditor(mount, {
+        placeholder: root.dataset.placeholder || '',
+        slashLabels: slashLabelsFrom(root),
     })
 
     const richCommands = {
@@ -163,7 +169,7 @@ export function mountEditor(root) {
                 }
                 editor.on('update', () => {
                     if (richMode) {
-                        source.value = editor.getMarkdown()
+                        source.value = markdownOf(editor)
                         dirty = true
                     }
                 })

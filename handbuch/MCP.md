@@ -49,3 +49,10 @@ The AI never gets more rights than you have: spaces you cannot read do not exist
 **Account → Connected AI apps** lists every app with access. **Revoke** ends the access immediately; the app has to ask for approval again. Deactivating a user also ends all of their access.
 
 Access tokens are valid for one hour and are renewed automatically by the app for up to 30 days.
+
+## Troubleshooting
+
+- **claude.ai cannot connect / sign-in window does not open:** check that `/mcp`, `/oauth/…` and `/.well-known/…` are reachable without Cloudflare Access, and that no bot protection (Cloudflare *Bot Fight Mode*, *Block AI bots*, challenges) blocks requests from Anthropic's servers to these paths – claude.ai calls the MCP server from its servers, not from your browser. A WAF skip rule for `/mcp` and `/oauth` solves this.
+- **"Redirect domain not permitted":** the client uses a callback address that is not in `MCP_REDIRECT_DOMAINS` (see [Operations](Operations.md)).
+- **Connected before, now asks again:** the access was revoked, the user deactivated, or the OAuth keys changed.
+- The administration dashboard shows the state of the MCP server (keys, connected apps).

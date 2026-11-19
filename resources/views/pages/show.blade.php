@@ -74,8 +74,35 @@
         </ul>
     @endif
 
+    @can('update', $page)
+        {{-- Inline editing: click into the text; "/" opens the block menu (resources/js/inline-editor.js). --}}
+        <div data-inline-bar hidden class="sticky top-14 z-20 -mx-4 mb-4 flex flex-wrap items-center justify-between gap-2 border-y border-indigo-100 bg-indigo-50/95 px-4 py-2 backdrop-blur md:-mx-8 md:px-8">
+            <p class="text-sm text-indigo-900" data-inline-status>{{ __('Editing – type / for blocks. Ctrl+S saves, Esc cancels.') }}</p>
+            <div class="flex gap-2">
+                <button type="button" class="btn-ghost" data-inline-cancel>{{ __('Cancel') }}</button>
+                <button type="button" class="btn-primary" data-inline-save>{{ __('Save') }}</button>
+            </div>
+        </div>
+        <p data-inline-hint class="mb-3 hidden text-xs text-slate-400 md:block">{{ __('Click into the text to edit it directly – type / for blocks.') }}</p>
+    @endcan
+
     <div class="flex gap-10">
-    <article data-code-copy data-copy-label="{{ __('Copy') }}" data-copied-label="{{ __('Copied') }}" class="min-w-0 flex-1 kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
+    <div data-inline-mount hidden class="min-w-0 flex-1 rounded-lg ring-2 ring-indigo-200 ring-offset-8"></div>
+    <article data-code-copy data-copy-label="{{ __('Copy') }}" data-copied-label="{{ __('Copied') }}"
+             @can('update', $page)
+                 data-inline-edit
+                 data-markdown-url="{{ route('pages.markdown', $page) }}"
+                 data-update-url="{{ route('pages.update', $page) }}"
+                 data-version="{{ $page->version }}"
+                 data-title="{{ $page->title }}"
+                 data-labels="{{ $page->labels->pluck('name')->implode(', ') }}"
+                 data-placeholder="{{ __('Start writing … type / for blocks.') }}"
+                 data-slash-labels="{{ json_encode(\App\Modules\Pages\Support\EditorLabels::slash()) }}"
+                 data-msg-saving="{{ __('Saving …') }}"
+                 data-msg-conflict="{{ __('This page was changed by someone else while you were editing. Copy your changes, reload and try again.') }}"
+                 data-msg-error="{{ __('The page could not be saved.') }}"
+                 data-msg-discard="{{ __('Discard your changes?') }}"
+             @endcan class="min-w-0 flex-1 kb-prose prose prose-slate max-w-none prose-headings:scroll-mt-20 prose-a:text-indigo-700 prose-img:rounded-md prose-table:text-sm">
         @if (trim($page->content) === '')
             <p class="text-slate-500">{{ __('This page is empty.') }}</p>
         @else

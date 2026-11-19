@@ -37,7 +37,9 @@
         <div class="kb-editor overflow-hidden rounded-lg border border-slate-300 bg-white" data-editor
              data-placeholder="{{ __('Start writing … Markdown shortcuts like # or - work.') }}"
              data-label-rich="{{ __('Editor') }}" data-label-source="{{ __('Markdown') }}"
-             data-preview-url="{{ route('pages.preview') }}" data-preview-empty="{{ __('Nothing to preview yet.') }}">
+             data-preview-url="{{ route('pages.preview') }}" data-preview-empty="{{ __('Nothing to preview yet.') }}"
+             data-slash-labels="{{ json_encode(\App\Modules\Pages\Support\EditorLabels::slash()) }}"
+             data-placeholders="{{ json_encode(\App\Modules\Pages\Support\EditorLabels::placeholders()) }}">
             <div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-1" data-editor-toolbar hidden>
                 @foreach ([
                     ['bold', 'B', __('Bold')], ['italic', 'I', __('Italic')], ['strike', 'S', __('Strikethrough')], ['code', '</>', __('Code')],

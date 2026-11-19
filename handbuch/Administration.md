@@ -2,6 +2,15 @@
 
 The administration area is at `/admin` and only available to workspace administrators. Open it via the account menu at the top right → **Administration**; **Back to the knowledge base** (below *Dashboard* in the navigation) returns to the app.
 
+## Dashboard
+
+The start page of the administration shows:
+
+- **Key figures:** users (with administrators and deactivated accounts), groups, spaces, pages (changes in the last 7 days, pages in the trash), attachments (number and size), labels, sign-ins in the last 7 days (users with passkey or authenticator app) and connected AI apps.
+- **System status:** database (PostgreSQL version), file storage (writable), application (version, PHP, Laravel; warns if `APP_DEBUG` is on or `APP_URL` is not https), **e-mail (SMTP)** and the **MCP server** (address, where the OAuth keys come from, connected apps).
+- **Test SMTP connection** connects to the mail server and signs in without sending anything; **Send test e-mail** sends a mail to your own address. The result of the last test is shown in the status (e-mail delivery is needed for sign-in links).
+- **Activity in the last 30 days:** page changes and sign-ins per day.
+
 ## Users
 
 **Administration → Users**

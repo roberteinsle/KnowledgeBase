@@ -2,6 +2,8 @@
 
 namespace App\Modules\Spaces;
 
+use App\Core\Admin\AdminMetric;
+use App\Core\Admin\AdminMetricRegistry;
 use App\Core\Dashboard\DashboardRegistry;
 use App\Core\Mcp\McpToolRegistry;
 use App\Core\Navigation\MenuItem;
@@ -56,6 +58,14 @@ class SpacesServiceProvider extends ServiceProvider
         ));
 
         $dashboard->add($this->app->make(SpacesWidget::class));
+        $this->app->make(AdminMetricRegistry::class)->add(new AdminMetric(
+            key: 'spaces',
+            label: 'Spaces',
+            value: fn () => Space::query()->count(),
+            icon: 'heroicon-o-folder',
+            order: 30,
+            route: 'filament.admin.resources.spaces.index',
+        ));
         Relation::morphMap(['space' => Space::class]);
         Gate::policy(Space::class, SpacePolicy::class);
 

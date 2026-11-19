@@ -2,6 +2,8 @@
 
 namespace App\Modules\Pages;
 
+use App\Core\Admin\AdminMetric;
+use App\Core\Admin\AdminMetricRegistry;
 use App\Core\Dashboard\DashboardRegistry;
 use App\Core\Mcp\McpToolRegistry;
 use App\Core\Navigation\MenuItem;
@@ -21,6 +23,7 @@ use App\Modules\Pages\Mcp\UpdatePageTool;
 use App\Modules\Pages\Models\Attachment;
 use App\Modules\Pages\Models\Label;
 use App\Modules\Pages\Models\Page;
+use App\Modules\Pages\Models\PageVersion;
 use App\Modules\Pages\Policies\PagePolicy;
 use App\Modules\Pages\Search\AttachmentSearchProvider;
 use App\Modules\Pages\Search\PageSearchProvider;
@@ -39,6 +42,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 
 class PagesServiceProvider extends ServiceProvider
@@ -89,6 +93,38 @@ class PagesServiceProvider extends ServiceProvider
         $search->add($this->app->make(PageSearchProvider::class));
         $search->add($this->app->make(AttachmentSearchProvider::class));
         $dashboard->add($this->app->make(RecentPagesWidget::class));
+        $this->registerAdminMetrics($this->app->make(AdminMetricRegistry::class));
+    }
+
+    private function registerAdminMetrics(AdminMetricRegistry $metrics): void
+    {
+        $metrics->add(new AdminMetric(
+            key: 'pages',
+            label: 'Pages',
+            value: fn () => Page::query()->count(),
+            icon: 'heroicon-o-document-text',
+            order: 40,
+            description: fn () => __(':count changes in the last 7 days · :trash in the trash', [
+                'count' => PageVersion::query()->where('created_at', '>=', now()->subDays(7))->count(),
+                'trash' => Page::onlyTrashed()->count(),
+            ]),
+        ));
+        $metrics->add(new AdminMetric(
+            key: 'attachments',
+            label: 'Attachments',
+            value: fn () => Attachment::query()->count(),
+            icon: 'heroicon-o-paper-clip',
+            order: 50,
+            description: fn () => Number::fileSize((int) Attachment::query()->sum('size')),
+        ));
+        $metrics->add(new AdminMetric(
+            key: 'labels',
+            label: 'Labels',
+            value: fn () => Label::query()->count(),
+            icon: 'heroicon-o-tag',
+            order: 60,
+            route: 'filament.admin.resources.labels.index',
+        ));
     }
 
     private function registerMenus(MenuRegistry $menus): void

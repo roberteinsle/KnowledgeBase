@@ -12,6 +12,7 @@ use App\Modules\Pages\Services\PageTree;
 use App\Modules\Pages\Support\CurrentPage;
 use App\Modules\Pages\Support\PageUrl;
 use App\Modules\Spaces\Models\Space;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -124,7 +125,7 @@ class PageController
         ]);
     }
 
-    public function update(Request $request, Page $page, PageService $pages): RedirectResponse
+    public function update(Request $request, Page $page, PageService $pages): RedirectResponse|JsonResponse
     {
         Gate::authorize('update', $page);
 
@@ -132,12 +133,20 @@ class PageController
 
         // Someone else saved in the meantime: do not silently overwrite.
         if ((int) $data['version'] !== $page->version) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'version_conflict', 'version' => $page->version], 409);
+            }
+
             return back()->withInput()->withErrors([
                 'content' => __('This page was changed by someone else while you were editing. Copy your changes, reload and try again.'),
             ]);
         }
 
         $pages->update($page, $data['title'], $data['content'] ?? '', $request->user(), LabelNormalizer::normalize($data['labels'] ?? ''));
+
+        if ($request->expectsJson()) {
+            return response()->json(['version' => $page->version, 'url' => $page->url()]);
+        }
 
         return redirect()->to($page->url())->with('status', __('Page saved.'));
     }

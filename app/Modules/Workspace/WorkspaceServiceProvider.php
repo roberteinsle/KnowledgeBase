@@ -2,6 +2,8 @@
 
 namespace App\Modules\Workspace;
 
+use App\Core\Admin\AdminMetric;
+use App\Core\Admin\AdminMetricRegistry;
 use App\Core\Navigation\NavigationItem;
 use App\Core\Navigation\NavigationRegistry;
 use App\Models\User;
@@ -21,6 +23,19 @@ class WorkspaceServiceProvider extends ServiceProvider
     public function boot(NavigationRegistry $navigation): void
     {
         Relation::morphMap(['workspace' => Workspace::class]);
+
+        $this->app->make(AdminMetricRegistry::class)->add(new AdminMetric(
+            key: 'users',
+            label: 'Users',
+            value: fn () => User::query()->where('is_active', true)->count(),
+            icon: 'heroicon-o-users',
+            order: 10,
+            description: fn () => __(':admins administrators · :inactive deactivated', [
+                'admins' => User::query()->where('role', User::ROLE_ADMIN)->where('is_active', true)->count(),
+                'inactive' => User::query()->where('is_active', false)->count(),
+            ]),
+            route: 'filament.admin.resources.users.index',
+        ));
 
         Route::middleware(['web', 'auth', 'account'])->group(function () {
             Route::get('/', HomeController::class)->name('home');

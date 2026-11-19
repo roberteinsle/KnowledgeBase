@@ -20,7 +20,7 @@
 | `APP_LOCALE` | Fallback language if the workspace setting is missing (default `de`). |
 | `DISPLAY_TIMEZONE` | Time zone for display (default `Europe/Berlin`). Times are always stored in UTC. |
 | `PASSKEYS_USER_HANDLE_SECRET` | Optional. Defaults to `APP_KEY`. |
-| `PASSPORT_PRIVATE_KEY`, `PASSPORT_PUBLIC_KEY` | Optional. RSA keys for the OAuth tokens of the MCP server. Without them the keys are generated once on the first start and stored in the volume `app-storage`. Changing them signs out all connected AI apps. |
+| `PASSPORT_PRIVATE_KEY`, `PASSPORT_PUBLIC_KEY` | Optional. RSA keys for the OAuth tokens of the MCP server. Without them the keys are generated once on the first start and stored in the volume `app-storage` – that is enough for most installations. Changing them signs out all connected AI apps. See *OAuth keys* below. |
 | `MCP_REDIRECT_DOMAINS` | Comma-separated origins MCP clients may use as OAuth callback. Default: `https://claude.ai,https://claude.com,http://localhost` (localhost covers Claude Code and desktop clients). Never use `*`: anybody could register a client and trick users into approving it. |
 
 `APP_DEBUG` is fixed to `false` in the image.
@@ -30,6 +30,21 @@
 All addresses are English: `/login`, `/spaces/<name>`, `/<space>/<title>-<number>` for pages, `/search`, `/account`, `/admin`. The German addresses of earlier versions (`/anmelden`, `/bereiche/…`, `/seiten/…`, `/anhaenge/…`, `/admin/benutzer` …) forward permanently to the new ones, so old bookmarks, sign-in links already sent and links in page content keep working. Links stored in content use the permanent form `/pages/<number>`, which survives renaming and moving.
 
 ## MCP server and OAuth
+
+### OAuth keys
+
+Nothing has to be done: on the first start the container generates an RSA key pair in `storage/` (volume `app-storage`) and reuses it. The dashboard shows "keys from storage volume".
+
+Only if you prefer the keys outside the volume (e.g. because the volume is recreated), create them once and store them as environment variables in Coolify:
+
+```bash
+openssl genrsa -out oauth-private.key 4096
+openssl rsa -in oauth-private.key -pubout -out oauth-public.key
+```
+
+Paste the complete file contents (including the `-----BEGIN …-----` and `-----END …-----` lines) into `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` (multi-line values) and redeploy; then delete the local files. Keep the private key secret. Switching keys signs out all connected AI apps once.
+
+### Reachability
 
 The MCP endpoint `/mcp` and the OAuth endpoints (`/oauth/…`, `/.well-known/oauth-…`) must be publicly reachable for claude.ai – do **not** put them behind Cloudflare Access. Access tokens are valid for one hour, refresh tokens for 30 days. All generated URLs (also the OAuth metadata) are built from `APP_URL`, never from the Host header of a request. Details for users: [MCP](MCP.md).
 
@@ -42,6 +57,10 @@ The app is publicly reachable; the administration area is therefore additionally
 3. Configure the server to accept web traffic only through Cloudflare (Cloudflare Tunnel or a firewall allowing only Cloudflare IPs). Otherwise Access can be bypassed via the server IP.
 
 Access is an additional layer: the app checks sign-in and administrator rights on its own regardless.
+
+All requests of the administration – including saving forms and uploading files (`/admin/livewire/…`) – are below `/admin`, so the Access application covers them completely. The default Livewire endpoints (`/livewire-…/update` etc.) are closed.
+
+Recommended Access settings: *HttpOnly* cookie attribute on, session duration about 24 hours, binding cookie optional.
 
 As the app is only reachable through the proxy, it trusts the forwarded visitor IP (for rate limits).
 
@@ -61,6 +80,10 @@ As the app is only reachable through the proxy, it trusts the forwarded visitor 
 | Uploads | 60 per hour |
 | Import | 20 per hour and 50 per day per user |
 | Export | 30 per hour |
+
+## Health check
+
+`/up` answers `OK` (plain text) when the app and the database work, otherwise `503`. Coolify's health check uses it.
 
 ## Backup
 

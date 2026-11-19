@@ -49,14 +49,25 @@ Favorites are personal: every user has their own. They appear on the home page a
 
 You need at least the role **Editor** in the space (see [Spaces, Groups and Permissions](Spaces-Groups-and-Permissions.md)).
 
+## Editing directly on the page
+
+With the role **Editor** you can change a page right where you read it: **click into the text**. The page turns into an editor (a blue bar appears at the top):
+
+- Type **/** at the start of a line or after a space to open the block menu: text, heading 1–3, bullet list, numbered list, task list, quote, code block, table, divider, table of contents. Keep typing to filter (e.g. `/quo`), choose with the arrow keys and Enter, close with Esc.
+- Markdown shortcuts work as well (`# `, `- `, `> `, ` ``` `).
+- **Save** or <kbd>Ctrl</kbd>+<kbd>S</kbd> saves (a new version), **Cancel** or <kbd>Esc</kbd> discards the changes.
+- Links, buttons and code copying keep working – a click on them does not start editing. Selecting text to copy it does not start editing either.
+
+The full editor (**Edit**) is still there for the title, labels and the Markdown source.
+
 ## Writing
 
 Pages are stored as **Markdown**. This keeps import, export and version comparison lossless.
 
 **Edit** opens the Markdown editor: the source on the left and a **live preview** on the right (on narrow screens below each other). The preview updates while you type and looks exactly like the saved page.
 
-- Toolbar: bold, italic, strikethrough, code, headings, lists, task lists, quote, code block, table, link, divider, table of contents. In the Markdown editor the buttons insert the Markdown syntax at the cursor or around the selected text; blocks such as tables or the table of contents go below the current line.
-- **Editor** (on the right of the toolbar) switches to formatted editing without Markdown syntax; **Markdown** switches back. Switching alone never changes the content.
+- Toolbar: bold, italic, strikethrough, code, headings, lists, task lists, quote, code block, table, link, divider, table of contents. In the Markdown editor the buttons insert the Markdown syntax at the cursor or around the selected text; on an empty line they insert a selected placeholder (e.g. "Quote") that you simply type over. Code blocks, tables and the table of contents always go on lines of their own below the current line.
+- **Editor** (on the right of the toolbar) switches to formatted editing without Markdown syntax, with the same **/** block menu as on the page; **Markdown** switches back. Switching alone never changes the content.
 - In the formatted editor Markdown shortcuts work while typing (`# `, `- `, `1. `, `> `, ` ``` `), and pasted Markdown text turns into formatting directly.
 - Without JavaScript a plain Markdown text field appears.
 - On the page, every code block has a **Copy** button in its top right corner that copies the code to the clipboard.
