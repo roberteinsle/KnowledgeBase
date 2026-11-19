@@ -145,7 +145,8 @@ jobs:
           id=$(docker create local/app:check)
           docker cp "$id:/var/www/html/public/build" ./bundle-check
           docker rm "$id"
-          if grep -rEi "sk-[a-z0-9]|api[_-]?key|secret" ./bundle-check; then
+          # "sk-" only as a standalone token with a key-like length (Tailwind emits e.g. "mask-repeat").
+          if grep -rE "(^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}" ./bundle-check || grep -rEi "api[_-]?key|secret" ./bundle-check; then
             echo "::error::Möglicher Schlüssel im Frontend-Bundle gefunden"
             exit 1
           fi
