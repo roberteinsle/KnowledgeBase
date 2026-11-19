@@ -13,7 +13,7 @@
         @foreach ($spaces as $space)
             <li>
                 <a href="{{ route('spaces.show', $space) }}" class="card flex h-full gap-3 hover:border-indigo-300 hover:shadow">
-                    <span class="text-2xl" aria-hidden="true">{{ $space->icon ?: '📁' }}</span>
+                    <x-space-icon :space="$space" size="size-8" class="text-2xl" />
                     <span class="min-w-0">
                         <span class="block font-medium text-slate-900">{{ $space->name }}</span>
                         @if ($space->description)

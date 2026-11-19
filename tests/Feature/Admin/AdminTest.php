@@ -10,6 +10,8 @@ use App\Modules\Groups\Models\Group;
 use App\Modules\Groups\Services\GroupService;
 use App\Modules\Spaces\Models\Space;
 use App\Modules\Workspace\Models\Workspace;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
@@ -89,4 +91,28 @@ it('saves workspace settings', function () {
 
     expect(Workspace::current()->name)->toBe('Wissen GmbH');
     expect(Workspace::current()->default_locale)->toBe('fr');
+});
+
+it('uploads a space icon through the admin form', function () {
+    Storage::fake('local');
+    $this->actingAs(admin());
+
+    Livewire::test(CreateSpace::class)
+        ->fillForm(['name' => 'Mit Bild', 'icon_path' => UploadedFile::fake()->image('logo.png', 64, 64)])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $space = Space::query()->where('name', 'Mit Bild')->sole();
+    expect($space->icon_path)->toStartWith('space-icons/');
+    Storage::disk('local')->assertExists($space->icon_path);
+});
+
+it('rejects SVG files as space icon in the admin form', function () {
+    Storage::fake('local');
+    $this->actingAs(admin());
+
+    Livewire::test(CreateSpace::class)
+        ->fillForm(['name' => 'Mit SVG', 'icon_path' => UploadedFile::fake()->createWithContent('logo.svg', '<svg xmlns="http://www.w3.org/2000/svg"/>')])
+        ->call('create')
+        ->assertHasFormErrors(['icon_path']);
 });

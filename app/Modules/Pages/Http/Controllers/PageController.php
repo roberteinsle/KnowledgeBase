@@ -2,8 +2,9 @@
 
 namespace App\Modules\Pages\Http\Controllers;
 
-use App\Core\ImportExport\ExportRegistry;
+use App\Core\Navigation\MenuRegistry;
 use App\Modules\Pages\Models\Page;
+use App\Modules\Pages\Services\FavoriteService;
 use App\Modules\Pages\Services\LabelNormalizer;
 use App\Modules\Pages\Services\MarkdownRenderer;
 use App\Modules\Pages\Services\PageService;
@@ -22,7 +23,7 @@ class PageController
         'labels' => ['nullable', 'string', 'max:1000'],
     ];
 
-    public function create(Request $request, Space $space, PageTree $tree): View
+    public function create(Request $request, Space $space): View
     {
         Gate::authorize('contribute', $space);
 
@@ -32,7 +33,6 @@ class PageController
             'space' => $space,
             'page' => null,
             'parent' => $parent,
-            'tree' => $tree->forSpace($space),
         ]);
     }
 
@@ -55,7 +55,7 @@ class PageController
         return redirect()->route('pages.show', $page)->with('status', __('Page created.'));
     }
 
-    public function show(Page $page, PageTree $tree, MarkdownRenderer $markdown, ExportRegistry $exports): View
+    public function show(Request $request, Page $page, PageTree $tree, MarkdownRenderer $markdown, MenuRegistry $menus, FavoriteService $favorites): View
     {
         Gate::authorize('view', $page);
 
@@ -65,14 +65,14 @@ class PageController
             'page' => $page,
             'space' => $page->space,
             'html' => $markdown->toHtml($page->content),
-            'tree' => $tree->forSpace($page->space),
             'ancestors' => $tree->ancestors($page),
             'children' => $page->children()->get(['id', 'title', 'parent_id']),
-            'exporters' => $exports->forScope('page'),
+            'menu' => $menus->for('page', $request->user(), $page->space),
+            'isFavorite' => in_array($page->id, $favorites->pageIdsFor($request->user()), true),
         ]);
     }
 
-    public function edit(Page $page, PageTree $tree): View
+    public function edit(Page $page): View
     {
         Gate::authorize('update', $page);
 
@@ -80,7 +80,6 @@ class PageController
             'space' => $page->space,
             'page' => $page->load('labels'),
             'parent' => $page->parent,
-            'tree' => $tree->forSpace($page->space),
         ]);
     }
 
@@ -111,7 +110,6 @@ class PageController
         return view('pages.move', [
             'page' => $page,
             'space' => $page->space,
-            'tree' => $tree->forSpace($page->space),
             'targets' => array_values(array_filter($tree->flat($page->space), fn ($n) => ! in_array($n['id'], $excluded, true))),
         ]);
     }

@@ -20,7 +20,6 @@ class ImportController
 
         return view('import.create', [
             'space' => $space,
-            'tree' => $tree->forSpace($space),
             'targets' => $tree->flat($space),
             'importers' => $importers->all(),
             'extensions' => $importers->extensions(),

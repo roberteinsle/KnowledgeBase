@@ -15,6 +15,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -61,7 +62,19 @@ class SpaceResource extends Resource
         return $schema->components([
             Section::make(__('Space'))->columns(2)->schema([
                 TextInput::make('name')->label(__('Name'))->required()->maxLength(100),
-                TextInput::make('icon')->label(__('Icon (emoji)'))->maxLength(16),
+                TextInput::make('icon')->label(__('Icon (emoji)'))->maxLength(16)
+                    ->helperText(__('Used when no image is uploaded.')),
+                FileUpload::make('icon_path')->label(__('Icon (image)'))
+                    ->image()
+                    ->avatar()
+                    ->imageEditor()
+                    ->disk('local')
+                    ->directory('space-icons')
+                    ->visibility('private')
+                    // Raster images only: SVG can contain scripts.
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+                    ->maxSize(1024)
+                    ->helperText(__('PNG, JPG, WebP or GIF, at most 1 MB. Shown square.')),
                 TextInput::make('slug')->label(__('URL name'))->maxLength(100)
                     ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
                     ->unique(ignoreRecord: true)
@@ -98,7 +111,7 @@ class SpaceResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label(__('Name'))->searchable()->sortable()
-                    ->formatStateUsing(fn (string $state, Space $record) => trim(($record->icon ?? '').' '.$state)),
+                    ->formatStateUsing(fn (string $state, Space $record) => trim(($record->hasImage() ? '' : ($record->icon ?? '')).' '.$state)),
                 TextColumn::make('slug')->label(__('URL name')),
                 TextColumn::make('permissions_count')->label(__('Permissions'))->counts('permissions'),
             ])

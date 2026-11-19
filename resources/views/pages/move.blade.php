@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Move: :title', ['title' => $page->title])" :space="$space" :tree="$tree" :current-page-id="$page->id">
+<x-layouts.app :title="__('Move: :title', ['title' => $page->title])">
     <h1 class="mb-6 text-2xl font-semibold">{{ __('Move “:title”', ['title' => $page->title]) }}</h1>
     <form method="post" action="{{ route('pages.move.update', $page) }}" class="card max-w-xl space-y-4">
         @csrf @method('PUT')

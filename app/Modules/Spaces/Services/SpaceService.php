@@ -8,6 +8,7 @@ use App\Modules\Spaces\Enums\SpaceRole;
 use App\Modules\Spaces\Events\SpaceDeleting;
 use App\Modules\Spaces\Models\Space;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 final class SpaceService
@@ -18,14 +19,17 @@ final class SpaceService
     ) {}
 
     /**
-     * @param  array{name: string, slug?: string|null, description?: string|null, icon?: string|null}  $data
+     * @param  array{name: string, slug?: string|null, description?: string|null, icon?: string|null, icon_path?: string|null}  $data
      * @param  list<array{subject_type: string, subject_id: int, role: string}>  $permissions
      */
     public function create(array $data, User $creator, array $permissions = []): Space
     {
         return DB::transaction(function () use ($data, $creator, $permissions) {
             $space = new Space;
+            $iconPath = $data['icon_path'] ?? null;
+            unset($data['icon_path']);
             $space->fill([...$data, 'slug' => $this->uniqueSlug($data['slug'] ?? null ?: $data['name'])]);
+            $space->icon_path = $iconPath;
             $space->created_by = $creator->id;
             $space->save();
 
@@ -37,7 +41,7 @@ final class SpaceService
     }
 
     /**
-     * @param  array{name: string, slug?: string|null, description?: string|null, icon?: string|null}  $data
+     * @param  array{name: string, slug?: string|null, description?: string|null, icon?: string|null, icon_path?: string|null}  $data
      * @param  list<array{subject_type: string, subject_id: int, role: string}>|null  $permissions
      */
     public function update(Space $space, array $data, ?array $permissions = null): Space
@@ -48,6 +52,11 @@ final class SpaceService
             } elseif ($data['slug'] !== $space->slug) {
                 $data['slug'] = $this->uniqueSlug($data['slug'], $space->id);
             }
+            if (array_key_exists('icon_path', $data)) {
+                $this->replaceIcon($space, $data['icon_path']);
+                unset($data['icon_path']);
+            }
+
             $space->fill($data)->save();
 
             if ($permissions !== null) {
@@ -65,6 +74,7 @@ final class SpaceService
         DB::transaction(function () use ($space) {
             SpaceDeleting::dispatch($space);
             $this->activity->log('space.deleted', $space, ['name' => $space->name]);
+            $this->replaceIcon($space, null);
             $space->delete();
         });
         $this->access->flush();
@@ -90,6 +100,17 @@ final class SpaceService
 
         $this->access->flush();
         $this->activity->log('space.permissions_updated', $space, ['count' => $rows->count()]);
+    }
+
+    /** Sets a new icon image (path on the private disk) and removes the old file. */
+    public function replaceIcon(Space $space, ?string $path): void
+    {
+        $old = $space->icon_path;
+        $space->icon_path = $path !== '' ? $path : null;
+
+        if ($old !== null && $old !== $space->icon_path) {
+            Storage::disk('local')->delete($old);
+        }
     }
 
     public function uniqueSlug(string $source, ?int $ignoreId = null): string

@@ -106,6 +106,117 @@ final class PageService implements PageWriter
         });
     }
 
+    public const BEFORE = 'before';
+
+    public const AFTER = 'after';
+
+    public const INSIDE = 'inside';
+
+    /**
+     * Drag & drop in the page tree: places the page before or after the target
+     * (same parent as the target) or inside it (as last sub-page). Siblings are
+     * renumbered so the order is gap-free.
+     */
+    public function place(Page $page, Page $target, string $placement, User $user): Page
+    {
+        if (! in_array($placement, [self::BEFORE, self::AFTER, self::INSIDE], true)) {
+            throw ValidationException::withMessages(['placement' => __('Invalid position.')]);
+        }
+
+        if ($target->space_id !== $page->space_id) {
+            throw ValidationException::withMessages(['target_id' => __('The parent page belongs to another space.')]);
+        }
+
+        $newParentId = $placement === self::INSIDE ? $target->id : $target->parent_id;
+
+        if ($target->id === $page->id || ($newParentId !== null && ($newParentId === $page->id || in_array($newParentId, $this->descendantIds($page), true)))) {
+            throw ValidationException::withMessages(['target_id' => __('A page cannot be moved below itself.')]);
+        }
+
+        return DB::transaction(function () use ($page, $target, $placement, $newParentId, $user) {
+            $siblings = Page::query()
+                ->where('space_id', $page->space_id)
+                ->where('parent_id', $newParentId)
+                ->whereKeyNot($page->id)
+                ->orderBy('position')->orderBy('id')
+                ->pluck('id')
+                ->all();
+
+            $index = match ($placement) {
+                self::INSIDE => count($siblings),
+                self::BEFORE => (int) array_search($target->id, $siblings, true),
+                self::AFTER => (int) array_search($target->id, $siblings, true) + 1,
+            };
+            array_splice($siblings, $index, 0, [$page->id]);
+
+            $page->parent_id = $newParentId;
+            $page->save();
+
+            foreach ($siblings as $position => $id) {
+                Page::query()->whereKey($id)->update(['position' => $position + 1]);
+            }
+
+            $this->activity->log('page.moved', $page, ['parent_id' => $newParentId, 'placement' => $placement], $user->id);
+
+            return $page->refresh();
+        });
+    }
+
+    /**
+     * Copies a page with its sub-pages, labels and attachments. Without a
+     * target space the copy is placed right after the original ("Duplicate"),
+     * otherwise at the end of the target parent in the target space.
+     */
+    public function duplicate(Page $source, User $user, ?Space $targetSpace = null, ?Page $targetParent = null): Page
+    {
+        $sameSpace = $targetSpace === null;
+        $targetSpace ??= $source->space;
+        $parent = $sameSpace ? $source->parent : $targetParent;
+
+        if ($parent !== null && $parent->space_id !== $targetSpace->id) {
+            throw ValidationException::withMessages(['parent_id' => __('The parent page belongs to another space.')]);
+        }
+
+        return DB::transaction(function () use ($source, $user, $targetSpace, $parent, $sameSpace) {
+            $title = $sameSpace ? __(':title (copy)', ['title' => $source->title]) : $source->title;
+            $copy = $this->copyTree($source, $targetSpace, $parent, $user, $title);
+
+            if ($sameSpace) {
+                $this->place($copy, $source, self::AFTER, $user);
+            }
+
+            $this->activity->log('page.duplicated', $copy, ['source_id' => $source->id, 'space_id' => $targetSpace->id], $user->id);
+
+            return $copy;
+        });
+    }
+
+    private function copyTree(Page $source, Space $space, ?Page $parent, User $user, ?string $title = null): Page
+    {
+        $source->loadMissing(['labels', 'attachments']);
+        $copy = $this->create($space, $parent, $title ?? $source->title, $source->content, $user, $source->labels->pluck('name')->all());
+
+        // Copy files and point links in the content to the copies.
+        $content = $copy->content;
+        foreach ($source->attachments as $attachment) {
+            $contents = $this->attachments->read($attachment);
+            if ($contents === null) {
+                continue;
+            }
+            $new = $this->attachments->storeContents($copy, $attachment->original_name, $contents, $user);
+            $content = preg_replace('#\((/(?:attachments|anhaenge)/'.$attachment->id.')\)#', '('.route('attachments.show', $new, false).')', $content) ?? $content;
+        }
+        if ($content !== $copy->content) {
+            $this->amendLatestVersion($copy, $content, $user);
+        }
+
+        foreach ($source->children()->get() as $child) {
+            $this->copyTree($child, $space, $copy, $user);
+        }
+
+        return $copy;
+    }
+
     /** Moves the page with all sub-pages to the trash. */
     public function trash(Page $page, User $user): void
     {

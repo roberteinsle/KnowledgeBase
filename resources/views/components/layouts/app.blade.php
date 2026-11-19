@@ -1,7 +1,8 @@
-@props(['title' => null, 'space' => null, 'tree' => null, 'currentPageId' => null])
+@props(['title' => null])
 @php
     $user = auth()->user();
     $navigation = app(\App\Core\Navigation\NavigationRegistry::class);
+    $sidebar = app(\App\Core\Sidebar\SidebarRegistry::class)->renderFor($user);
     $workspace = \App\Modules\Workspace\Models\Workspace::current();
     $isActive = fn ($item) => collect($item->activeRoutes ?: [$item->route])->contains(fn ($pattern) => request()->routeIs($pattern));
 @endphp
@@ -14,7 +15,7 @@
     <title>{{ $title ? $title.' · ' : '' }}{{ $workspace->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full text-slate-900 antialiased">
+<body class="h-full text-slate-900 antialiased" x-data="{ nav: false }" @keydown.escape.window="nav = false">
 <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">{{ __('Skip to content') }}</a>
 
 <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -23,6 +24,17 @@
             <span class="grid size-8 place-items-center rounded-md bg-indigo-600 text-white">{{ mb_substr($workspace->name, 0, 1) }}</span>
             <span class="hidden sm:inline">{{ $workspace->name }}</span>
         </a>
+
+        <nav class="ml-4 hidden items-center gap-1 lg:flex" aria-label="{{ __('Main areas') }}">
+            @foreach ($navigation->for($user, 'main') as $item)
+                @continue($item->key === 'search')
+                <a href="{{ route($item->route) }}" @class([
+                    'rounded-md px-3 py-1.5 text-sm font-medium',
+                    'bg-slate-100 text-slate-900' => $isActive($item),
+                    'text-slate-600 hover:bg-slate-100' => ! $isActive($item),
+                ]) @if ($isActive($item)) aria-current="page" @endif>{{ __($item->label) }}</a>
+            @endforeach
+        </nav>
 
         <form action="{{ route('search') }}" method="get" role="search" class="mx-auto hidden w-full max-w-xl md:block">
             <label for="global-search" class="sr-only">{{ __('Search') }}</label>
@@ -61,32 +73,20 @@
 </header>
 
 <div class="mx-auto flex max-w-screen-2xl">
-    <aside class="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-white px-3 py-4 md:block" aria-label="{{ __('Navigation') }}">
-        <nav class="space-y-1">
-            @foreach ($navigation->for($user, 'main') as $item)
-                <a href="{{ route($item->route) }}" @class([
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium',
-                    'bg-indigo-50 text-indigo-700' => $isActive($item),
-                    'text-slate-700 hover:bg-slate-100' => ! $isActive($item),
-                ]) @if ($isActive($item)) aria-current="page" @endif>
-                    <x-kb-icon :name="$item->icon" class="size-5" /> {{ __($item->label) }}
-                </a>
-            @endforeach
-        </nav>
-
-        @if ($space)
-            <x-space-sidebar :space="$space" :tree="$tree" :current-page-id="$currentPageId" class="mt-6 border-t border-slate-100 pt-4" />
-        @endif
+    {{-- One sidebar: a column on desktop, a slide-in panel on phones. --}}
+    <div x-cloak x-show="nav" @click="nav = false" class="fixed inset-0 top-14 z-20 bg-slate-900/30 md:hidden"></div>
+    <aside id="sidebar" class="fixed bottom-0 left-0 top-14 z-20 w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 px-3 py-3 max-md:hidden md:sticky md:h-[calc(100vh-3.5rem)]"
+           :class="{ 'max-md:hidden': !nav }" aria-label="{{ __('Navigation') }}">
+        @foreach ($sidebar as $section)
+            {{ $section }}
+        @endforeach
     </aside>
 
     <main id="main" class="min-w-0 flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-10">
-        @if ($space)
-            <details class="mb-4 rounded-lg border border-slate-200 bg-white md:hidden">
-                <summary class="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm font-medium">
-                    <x-kb-icon name="bars" class="size-4" /> {{ __('Pages in :space', ['space' => $space->name]) }}
-                </summary>
-                <x-space-sidebar :space="$space" :tree="$tree" :current-page-id="$currentPageId" class="px-3 pb-3" />
-            </details>
+        @if ($sidebar !== [])
+            <button type="button" @click="nav = true" class="btn-secondary mb-4 md:hidden" aria-controls="sidebar" :aria-expanded="nav">
+                <x-kb-icon name="bars" class="size-4" /> {{ __('Spaces and pages') }}
+            </button>
         @endif
 
         <x-flash />

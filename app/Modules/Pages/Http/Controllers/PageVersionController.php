@@ -6,7 +6,6 @@ use App\Modules\Pages\Models\Page;
 use App\Modules\Pages\Models\PageVersion;
 use App\Modules\Pages\Services\MarkdownRenderer;
 use App\Modules\Pages\Services\PageService;
-use App\Modules\Pages\Services\PageTree;
 use App\Modules\Pages\Services\VersionDiff;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,19 +14,18 @@ use Illuminate\View\View;
 
 class PageVersionController
 {
-    public function index(Page $page, PageTree $tree): View
+    public function index(Page $page): View
     {
         Gate::authorize('view', $page);
 
         return view('pages.versions', [
             'page' => $page,
             'space' => $page->space,
-            'tree' => $tree->forSpace($page->space),
             'versions' => $page->versions()->with('user')->paginate(30),
         ]);
     }
 
-    public function show(Page $page, int $version, PageTree $tree, VersionDiff $diff, MarkdownRenderer $markdown): View
+    public function show(Page $page, int $version, VersionDiff $diff, MarkdownRenderer $markdown): View
     {
         Gate::authorize('view', $page);
 
@@ -37,7 +35,6 @@ class PageVersionController
         return view('pages.version', [
             'page' => $page,
             'space' => $page->space,
-            'tree' => $tree->forSpace($page->space),
             'version' => $current,
             'previous' => $previous,
             'diff' => $diff->lines(

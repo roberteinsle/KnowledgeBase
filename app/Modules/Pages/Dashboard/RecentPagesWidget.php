@@ -4,13 +4,13 @@ namespace App\Modules\Pages\Dashboard;
 
 use App\Core\Dashboard\DashboardWidget;
 use App\Models\User;
-use App\Modules\Pages\Models\Page;
+use App\Modules\Pages\Services\PageOverview;
 use App\Modules\Spaces\Contracts\SpaceAccess;
 use Illuminate\Contracts\View\View;
 
 class RecentPagesWidget implements DashboardWidget
 {
-    public function __construct(private SpaceAccess $access) {}
+    public function __construct(private PageOverview $overview) {}
 
     public function key(): string
     {
@@ -19,18 +19,14 @@ class RecentPagesWidget implements DashboardWidget
 
     public function order(): int
     {
-        return 20;
+        return 10;
     }
 
     public function render(User $user): ?View
     {
-        $pages = Page::query()
-            ->whereIn('space_id', $this->access->spaceIdsFor($user))
-            ->with(['space:id,name,slug', 'editor:id,name'])
-            ->latest('updated_at')
-            ->limit(10)
-            ->get();
-
-        return view('pages.widget-recent', ['pages' => $pages]);
+        return view('pages.overview-tabs', [
+            'lists' => $this->overview->for($user, app(SpaceAccess::class)->spaceIdsFor($user)),
+            'showSpace' => true,
+        ]);
     }
 }

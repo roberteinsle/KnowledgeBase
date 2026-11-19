@@ -2,6 +2,45 @@
 
 Seiten sind die eigentlichen Inhalte. Jede Seite gehört zu einem Bereich und kann Unterseiten haben.
 
+## Seitenbaum
+
+Die linke Leiste zeigt alle Seiten des aktuellen Bereichs als Baum. Seiten mit Unterseiten haben einen Pfeil zum Auf- und Zuklappen; der Zustand wird im Browser gemerkt.
+
+Beim Überfahren einer Seite erscheinen zwei Knöpfe:
+
+- **⋮** öffnet das Seitenmenü (siehe unten),
+- **+** legt eine Unterseite an (Rolle **Bearbeiten**).
+
+Neben der Überschrift *Seiten* öffnet **…** das Bereichsmenü (Markdown importieren, Bereich exportieren, Papierkorb), **+** legt eine neue Seite auf oberster Ebene an.
+
+### Seiten mit der Maus verschieben
+
+Mit der Rolle **Bearbeiten** lassen sich Seiten im Baum ziehen:
+
+- auf den **oberen oder unteren Rand** einer Seite ziehen – die Seite wird davor bzw. danach eingereiht (eine Linie zeigt die Stelle),
+- auf die **Mitte** einer Seite ziehen – die Seite wird deren letzte Unterseite (die Zielseite wird hervorgehoben).
+
+Unterseiten wandern mit. Eine Seite lässt sich nicht in ihre eigenen Unterseiten ziehen. Auf dem Handy und per Tastatur geht dasselbe über **⋮ → Verschieben**.
+
+### Seitenmenü (⋮)
+
+| Eintrag | Wirkung | Rolle |
+|---|---|---|
+| Link kopieren | Adresse der Seite in die Zwischenablage | Lesen |
+| Zu Favoriten hinzufügen / entfernen | Seite erscheint unter *Favoriten* auf der Startseite | Lesen |
+| Diese Seite als Markdown / mit Unterseiten als ZIP | Export (siehe [Import und Export](Import-und-Export.md)) | Lesen |
+| Duplizieren | Kopie mit Unterseiten, Labels und Anhängen direkt unter dem Original, Titel mit „(Kopie)“ | Bearbeiten |
+| Verschieben | unter eine andere Seite oder auf die oberste Ebene | Bearbeiten |
+| In Bereich kopieren | Kopie mit Unterseiten, Labels und Anhängen in einen anderen Bereich, in dem du bearbeiten darfst | Lesen (Quelle), Bearbeiten (Ziel) |
+| Versionsverlauf | siehe unten | Lesen |
+| In den Papierkorb verschieben | siehe unten | Bereichsadmin |
+
+Dieselben Einträge stehen auf der Seite selbst unter **Mehr**. Kopien beginnen mit einem neuen Versionsverlauf.
+
+## Favoriten
+
+Favoriten sind persönlich: Jeder Benutzer hat seine eigenen. Sie erscheinen auf der Startseite und im Überblick eines Bereichs unter **Favoriten**; auf der Seite selbst zeigt ein Stern neben dem Titel, dass sie ein Favorit ist.
+
 ## Seite anlegen
 
 - Im Bereich: **Neue Seite** (Hauptaktion oben rechts) oder in der Seitenleiste.
@@ -39,7 +78,7 @@ Jedes Speichern mit geändertem Titel oder Inhalt erzeugt eine neue Version.
 
 ## Verschieben
 
-**Mehr → Verschieben** hängt eine Seite unter eine andere Seite desselben Bereichs oder auf die oberste Ebene. Unterseiten wandern mit. Eine Seite kann nicht unter sich selbst oder ihre eigenen Unterseiten verschoben werden.
+Am schnellsten per Maus im Seitenbaum (siehe oben). Alternativ hängt **⋮ → Verschieben** bzw. **Mehr → Verschieben** eine Seite unter eine andere Seite desselben Bereichs oder auf die oberste Ebene. Unterseiten wandern mit. Eine Seite kann nicht unter sich selbst oder ihre eigenen Unterseiten verschoben werden.
 
 ## Anhänge
 

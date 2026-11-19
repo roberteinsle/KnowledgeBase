@@ -2,8 +2,11 @@
 
 use App\Core\Http\LegacyRedirects;
 use App\Modules\Pages\Http\Controllers\AttachmentController;
+use App\Modules\Pages\Http\Controllers\FavoriteController;
 use App\Modules\Pages\Http\Controllers\LabelController;
 use App\Modules\Pages\Http\Controllers\PageController;
+use App\Modules\Pages\Http\Controllers\PageCopyController;
+use App\Modules\Pages\Http\Controllers\PageTreeController;
 use App\Modules\Pages\Http\Controllers\PageVersionController;
 use App\Modules\Pages\Http\Controllers\SpaceHomeController;
 use App\Modules\Pages\Http\Controllers\TrashController;
@@ -20,6 +23,11 @@ Route::put('/pages/{page}', [PageController::class, 'update'])->whereNumber('pag
 Route::get('/pages/{page}/move', [PageController::class, 'moveForm'])->whereNumber('page')->name('pages.move');
 Route::put('/pages/{page}/move', [PageController::class, 'move'])->whereNumber('page')->name('pages.move.update');
 Route::delete('/pages/{page}', [PageController::class, 'destroy'])->whereNumber('page')->name('pages.destroy');
+Route::post('/pages/{page}/place', [PageTreeController::class, 'place'])->whereNumber('page')->name('pages.place');
+Route::post('/pages/{page}/duplicate', [PageCopyController::class, 'duplicate'])->whereNumber('page')->name('pages.duplicate');
+Route::get('/pages/{page}/copy', [PageCopyController::class, 'create'])->whereNumber('page')->name('pages.copy');
+Route::post('/pages/{page}/copy', [PageCopyController::class, 'store'])->whereNumber('page')->name('pages.copy.store');
+Route::post('/pages/{page}/favorite', [FavoriteController::class, 'toggle'])->whereNumber('page')->name('pages.favorite');
 
 Route::get('/pages/{page}/versions', [PageVersionController::class, 'index'])->whereNumber('page')->name('pages.versions');
 Route::get('/pages/{page}/versions/{version}', [PageVersionController::class, 'show'])->whereNumber(['page', 'version'])->name('pages.versions.show');

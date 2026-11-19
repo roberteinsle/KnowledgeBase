@@ -6,8 +6,10 @@ use App\Core\Activity\ActivityLogger;
 use App\Core\Dashboard\DashboardRegistry;
 use App\Core\ImportExport\ExportRegistry;
 use App\Core\ImportExport\ImportRegistry;
+use App\Core\Navigation\MenuRegistry;
 use App\Core\Navigation\NavigationRegistry;
 use App\Core\Search\SearchRegistry;
+use App\Core\Sidebar\SidebarRegistry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,6 +32,8 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->singleton(ExportRegistry::class);
         $this->app->singleton(ActivityLogger::class);
         $this->app->singleton(DashboardRegistry::class);
+        $this->app->singleton(MenuRegistry::class);
+        $this->app->singleton(SidebarRegistry::class);
     }
 
     public function boot(): void

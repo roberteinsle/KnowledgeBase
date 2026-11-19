@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Version history')" :space="$space" :tree="$tree" :current-page-id="$page->id">
+<x-layouts.app :title="__('Version history')">
     <a href="{{ route('pages.show', $page) }}" class="text-sm text-slate-500 hover:text-indigo-700">← {{ $page->title }}</a>
     <h1 class="mb-6 mt-2 text-2xl font-semibold">{{ __('Version history') }}</h1>
 

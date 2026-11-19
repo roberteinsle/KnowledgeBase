@@ -14,7 +14,27 @@ final readonly class SearchQuery
     private function __construct(
         public string $raw,
         public array $terms,
+        /** Restricts the search to one space; providers must still apply the user's rights. */
+        public ?int $spaceId = null,
     ) {}
+
+    public function inSpace(?int $spaceId): self
+    {
+        return new self($this->raw, $this->terms, $spaceId);
+    }
+
+    /**
+     * @param  list<int>  $readableSpaceIds
+     * @return list<int>
+     */
+    public function restrictSpaces(array $readableSpaceIds): array
+    {
+        if ($this->spaceId === null) {
+            return $readableSpaceIds;
+        }
+
+        return in_array($this->spaceId, $readableSpaceIds, true) ? [$this->spaceId] : [];
+    }
 
     public static function fromInput(?string $input): self
     {

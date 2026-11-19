@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Import Markdown')" :space="$space" :tree="$tree">
+<x-layouts.app :title="__('Import Markdown')">
     <h1 class="mb-2 text-2xl font-semibold">{{ __('Import Markdown') }}</h1>
     <p class="mb-6 max-w-3xl text-sm text-slate-600">
         {{ __('Upload Markdown files or a ZIP archive (e.g. an Obsidian vault or a Notion export), or paste Markdown directly. Folders become sub-pages, images become attachments, a title from the front matter or the first heading becomes the page title.') }}

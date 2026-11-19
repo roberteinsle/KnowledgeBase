@@ -1,5 +1,5 @@
 @php($isNew = $page === null)
-<x-layouts.app :title="$isNew ? __('New page') : __('Edit: :title', ['title' => $page->title])" :space="$space" :tree="$tree" :current-page-id="$page?->id">
+<x-layouts.app :title="$isNew ? __('New page') : __('Edit: :title', ['title' => $page->title])">
     <form method="post" action="{{ $isNew ? route('pages.store', $space) : route('pages.update', $page) }}" data-editor-form class="space-y-4">
         @csrf
         @unless ($isNew) @method('PUT') <input type="hidden" name="version" value="{{ old('version', $page->version) }}"> @endunless

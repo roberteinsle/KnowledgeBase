@@ -44,7 +44,10 @@ it('uses every translation key in the code or nowhere', function () {
     $missing = [];
     preg_match_all("/__\\(\\s*'((?:[^'\\\\]|\\\\.)*)'/", $code, $single);
     preg_match_all('/trans_choice\(\s*\'((?:[^\'\\\\]|\\\\.)*)\'/', $code, $choice);
-    foreach ([...$single[1], ...$choice[1]] as $used) {
+    // Menu labels are passed positionally: new MenuItem('key', 'Label', …)
+    preg_match_all("/new MenuItem\\(\\s*'[^']*',\\s*'((?:[^'\\\\]|\\\\.)*)'/", $code, $menu);
+    preg_match_all("/(?:label|activeLabel|confirm): '((?:[^'\\\\]|\\\\.)*)'/", $code, $named);
+    foreach ([...$single[1], ...$choice[1], ...$menu[1], ...$named[1]] as $used) {
         $used = stripslashes($used);
         if (! in_array($used, $keys, true)) {
             $missing[] = $used;

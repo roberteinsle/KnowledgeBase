@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Trash')" :space="$space" :tree="$tree">
+<x-layouts.app :title="__('Trash')">
     <h1 class="mb-2 text-2xl font-semibold">{{ __('Trash') }}</h1>
     <p class="mb-6 text-sm text-slate-600">{{ __('Pages in the trash can be restored together with their sub-pages, or deleted permanently.') }}</p>
 

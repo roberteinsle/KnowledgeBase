@@ -11,7 +11,7 @@
         <input id="home-search" name="q" type="search" class="input" maxlength="200" placeholder="{{ __('Search pages and attachments') }}">
     </form>
 
-    <div class="grid gap-8 xl:grid-cols-2">
+    <div class="space-y-10">
         @foreach ($widgets as $widget)
             <section>{{ $widget }}</section>
         @endforeach

@@ -2,9 +2,11 @@
 
 use App\Core\Http\LegacyRedirects;
 use App\Modules\Spaces\Http\Controllers\SpaceController;
+use App\Modules\Spaces\Http\Controllers\SpaceIconController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/spaces', [SpaceController::class, 'index'])->name('spaces.index');
+Route::get('/spaces/{space}/icon', SpaceIconController::class)->name('spaces.icon');
 
 // Former German paths. Sub-paths below a space belong to other modules; the
 // map only translates the fixed words, the space slug stays untouched.

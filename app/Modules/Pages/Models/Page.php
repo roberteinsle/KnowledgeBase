@@ -74,6 +74,12 @@ class Page extends Model
         return $this->hasMany(Attachment::class)->orderBy('original_name');
     }
 
+    /** @return BelongsToMany<User, $this> */
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'page_favorites');
+    }
+
     /** @return BelongsTo<User, $this> */
     public function author(): BelongsTo
     {

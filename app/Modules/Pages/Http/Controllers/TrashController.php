@@ -4,7 +4,6 @@ namespace App\Modules\Pages\Http\Controllers;
 
 use App\Modules\Pages\Models\Page;
 use App\Modules\Pages\Services\PageService;
-use App\Modules\Pages\Services\PageTree;
 use App\Modules\Spaces\Models\Space;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,13 +12,12 @@ use Illuminate\View\View;
 
 class TrashController
 {
-    public function index(Space $space, PageTree $tree): View
+    public function index(Space $space): View
     {
         Gate::authorize('moderate', $space);
 
         return view('pages.trash', [
             'space' => $space,
-            'tree' => $tree->forSpace($space),
             'pages' => Page::onlyTrashed()->where('space_id', $space->id)->latest('deleted_at')->paginate(50),
         ]);
     }

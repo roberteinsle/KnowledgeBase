@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
  * @property string $slug
  * @property string|null $description
  * @property string|null $icon
+ * @property string|null $icon_path
  * @property int|null $created_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -21,6 +22,30 @@ use Illuminate\Support\Carbon;
 class Space extends Model
 {
     protected $fillable = ['name', 'slug', 'description', 'icon'];
+
+    public function hasImage(): bool
+    {
+        return $this->icon_path !== null && $this->icon_path !== '';
+    }
+
+    /** Two letters for the fallback badge, e.g. "Liedelt Immo" → "LI". */
+    public function initials(): string
+    {
+        $words = preg_split('/[\s\-_]+/u', trim($this->name), -1, PREG_SPLIT_NO_EMPTY) ?: ['?'];
+        $letters = count($words) > 1
+            ? mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1)
+            : mb_substr($words[0], 0, 2);
+
+        return mb_strtoupper($letters);
+    }
+
+    /** Stable colour for the initials badge. */
+    public function badgeColor(): string
+    {
+        $colors = ['bg-red-700', 'bg-purple-700', 'bg-indigo-700', 'bg-sky-700', 'bg-teal-700', 'bg-emerald-700', 'bg-amber-700', 'bg-rose-700', 'bg-slate-700'];
+
+        return $colors[crc32($this->name) % count($colors)];
+    }
 
     public function getRouteKeyName(): string
     {

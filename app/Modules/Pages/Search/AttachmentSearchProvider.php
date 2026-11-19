@@ -25,7 +25,7 @@ class AttachmentSearchProvider implements SearchProvider
 
     public function search(User $user, SearchQuery $query, int $limit): array
     {
-        $spaceIds = $this->access->spaceIdsFor($user);
+        $spaceIds = $query->restrictSpaces($this->access->spaceIdsFor($user));
         if ($spaceIds === [] || $query->isEmpty()) {
             return [];
         }

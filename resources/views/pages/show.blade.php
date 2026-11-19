@@ -1,4 +1,4 @@
-<x-layouts.app :title="$page->title" :space="$space" :tree="$tree" :current-page-id="$page->id">
+<x-layouts.app :title="$page->title">
     <nav aria-label="{{ __('Breadcrumb') }}" class="mb-3 flex flex-wrap items-center gap-1 text-sm text-slate-500">
         <a href="{{ route('spaces.show', $space) }}" class="hover:text-indigo-700">{{ $space->name }}</a>
         @foreach ($ancestors as $ancestor)
@@ -8,7 +8,7 @@
     </nav>
 
     <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
-        <h1 class="min-w-0 break-words text-3xl font-semibold">{{ $page->title }}</h1>
+        <h1 class="flex min-w-0 items-center gap-2 break-words text-3xl font-semibold">{{ $page->title }}@if ($isFavorite)<x-kb-icon name="star" class="size-5 shrink-0 fill-amber-400 text-amber-500" /><span class="sr-only">{{ __('Favorite') }}</span>@endif</h1>
         <div class="flex flex-wrap items-center gap-2">
             @can('update', $page)
                 <a href="{{ route('pages.edit', $page) }}" class="btn-primary"><x-kb-icon name="pencil" class="size-4" /> {{ __('Edit') }}</a>
@@ -17,20 +17,33 @@
                 <button type="button" class="btn-secondary" @click="open = !open" :aria-expanded="open" aria-haspopup="menu">{{ __('More') }} <x-kb-icon name="chevron-down" class="size-4" /></button>
                 <div x-cloak x-show="open" @click.outside="open = false" role="menu" class="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
                     @can('update', $page)
-                        <a role="menuitem" href="{{ route('pages.create', [$space, 'parent' => $page->id]) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="plus" class="size-4" /> {{ __('New sub-page') }}</a>
-                        <a role="menuitem" href="{{ route('import.create', [$space, 'parent' => $page->id]) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="upload" class="size-4" /> {{ __('Import below this page') }}</a>
-                        <a role="menuitem" href="{{ route('pages.move', $page) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="move" class="size-4" /> {{ __('Move') }}</a>
+                        <a role="menuitem" href="{{ route('pages.create', [$space, 'parent' => $page->id]) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="plus" class="size-4 text-slate-500" /> {{ __('New sub-page') }}</a>
+                        <a role="menuitem" href="{{ route('import.create', [$space, 'parent' => $page->id]) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="upload" class="size-4 text-slate-500" /> {{ __('Import below this page') }}</a>
                     @endcan
-                    <a role="menuitem" href="{{ route('pages.versions', $page) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="clock" class="size-4" /> {{ __('Version history') }}</a>
-                    @foreach ($exporters as $exporter)
-                        <a role="menuitem" href="{{ route('export.page', [$page, $exporter->key()]) }}" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50"><x-kb-icon name="download" class="size-4" /> {{ __($exporter->label()) }}</a>
+                    {{-- Same entries as the "⋮" menu in the tree (MenuRegistry "page"). --}}
+                    @foreach ($menu as $item)
+                        @php($url = $item->urlFor($page->id))
+                        @php($classes = 'flex w-full items-center gap-2 px-4 py-2 text-left text-sm '.($item->danger ? 'text-red-700 hover:bg-red-50' : 'hover:bg-slate-50'))
+                        @if ($item->danger) <div class="my-1 border-t border-slate-100"></div> @endif
+                        @if ($item->kind === \App\Core\Navigation\MenuItem::COPY)
+                            <button type="button" role="menuitem" class="{{ $classes }}" x-data="{ done: false }"
+                                    @click="navigator.clipboard?.writeText(@js(url($url))).then(() => done = true)">
+                                <x-kb-icon :name="$item->icon" class="size-4 text-slate-500" />
+                                <span x-text="done ? @js(__('Link copied')) : @js(__($item->label))">{{ __($item->label) }}</span>
+                            </button>
+                        @elseif (in_array($item->kind, [\App\Core\Navigation\MenuItem::POST, \App\Core\Navigation\MenuItem::DELETE], true))
+                            <form method="post" action="{{ $url }}" @if ($item->confirm) data-confirm="{{ __($item->confirm) }}" @endif>
+                                @csrf
+                                @if ($item->kind === \App\Core\Navigation\MenuItem::DELETE) @method('DELETE') @endif
+                                <button type="submit" role="menuitem" class="{{ $classes }}">
+                                    <x-kb-icon :name="$item->icon" class="size-4 {{ $item->danger ? '' : 'text-slate-500' }}" />
+                                    {{ __($isFavorite && $item->activeLabel ? $item->activeLabel : $item->label) }}
+                                </button>
+                            </form>
+                        @else
+                            <a role="menuitem" href="{{ $url }}" class="{{ $classes }}"><x-kb-icon :name="$item->icon" class="size-4 text-slate-500" /> {{ __($item->label) }}</a>
+                        @endif
                     @endforeach
-                    @can('delete', $page)
-                        <form method="post" action="{{ route('pages.destroy', $page) }}" data-confirm="{{ __('Move this page and all its sub-pages to the trash?') }}" class="border-t border-slate-100">
-                            @csrf @method('DELETE')
-                            <button type="submit" role="menuitem" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-red-50"><x-kb-icon name="trash" class="size-4" /> {{ __('Move to trash') }}</button>
-                        </form>
-                    @endcan
                 </div>
             </div>
         </div>

@@ -3,8 +3,16 @@
     <form action="{{ route('search') }}" method="get" role="search" class="mb-8 flex max-w-2xl gap-2">
         <label for="q" class="sr-only">{{ __('Search term') }}</label>
         <input id="q" name="q" type="search" value="{{ $query->raw }}" maxlength="200" autofocus class="input" placeholder="{{ __('Search pages and attachments') }}">
+        @if ($space) <input type="hidden" name="space" value="{{ $space->slug }}"> @endif
         <button type="submit" class="btn-primary"><x-kb-icon name="search" class="size-4" /><span class="sr-only sm:not-sr-only">{{ __('Search') }}</span></button>
     </form>
+
+    @if ($space)
+        <p class="-mt-5 mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1"><x-space-icon :space="$space" size="size-4" /> {{ __('Only in :space', ['space' => $space->name]) }}</span>
+            <a href="{{ route('search', ['q' => $query->raw]) }}" class="text-indigo-700 hover:underline">{{ __('Search all spaces') }}</a>
+        </p>
+    @endif
 
     @if (! $query->isEmpty())
         @forelse ($groups as $group)

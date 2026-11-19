@@ -2,7 +2,13 @@
 
 ## Bereiche
 
-Ein Bereich bündelt Seiten, Rechte und Beteiligte für ein Team, ein Projekt oder einen Zweck. Bereiche legen Administratoren unter **Administration → Bereiche** an: Name, Symbol (Emoji), URL-Name (z. B. `personal` → `/spaces/personal`) und Beschreibung.
+Ein Bereich bündelt Seiten, Rechte und Beteiligte für ein Team, ein Projekt oder einen Zweck. Bereiche legen Administratoren unter **Administration → Bereiche** an: Name, URL-Name (z. B. `personal` → `/spaces/personal`), Beschreibung und Symbol. In der linken Leiste führt **Bereichseinstellungen** Administratoren direkt dorthin.
+
+### Symbol eines Bereichs
+
+- **Bild hochladen:** PNG, JPG, WebP oder GIF bis 1 MB; es wird quadratisch zugeschnitten (Bildeditor im Formular). SVG ist aus Sicherheitsgründen nicht erlaubt. Das Bild sieht nur, wer den Bereich lesen darf.
+- **Emoji:** wird verwendet, wenn kein Bild hochgeladen ist.
+- Ohne beides zeigt die App einen farbigen Kreis mit den Anfangsbuchstaben (aus „Liedelt Immo“ wird „LI“).
 
 Das Löschen eines Bereichs entfernt alle Seiten, Versionen und Anhänge endgültig.
 

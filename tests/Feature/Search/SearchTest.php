@@ -14,8 +14,10 @@ it('finds pages by title and content with prefix matching', function () {
     page($this->space, ['title' => 'Urlaubsantrag', 'content' => 'So beantragst du deinen Urlaub im Personalportal.']);
     page($this->space, ['title' => 'Kantine', 'content' => 'Speiseplan']);
 
+    // Only the result list counts – the sidebar tree lists all pages of the space.
+    $result = 'hover:underline">';
     $this->actingAs($this->user)->get('/search?q=personalport')
-        ->assertOk()->assertSee('Urlaubsantrag')->assertDontSee('Kantine');
+        ->assertOk()->assertSee($result.'Urlaubsantrag', false)->assertDontSee($result.'Kantine', false);
 });
 
 it('highlights hits without allowing HTML', function () {

@@ -24,6 +24,13 @@ Knowledgebase ist eine Wissensdatenbank für Teams: Dokumentation in **Bereichen
 | **Seite** (Page) | Ein Dokument in einem Bereich. Seiten können Unterseiten haben. |
 | **Gruppe** | Mehrere Benutzer, denen gemeinsam Rechte gegeben werden. Alle Benutzer gehören automatisch zur Gruppe **Everyone**. |
 
+## Navigation
+
+- **Kopfzeile:** Logo und Startseite links, Suche in der Mitte (Taste <kbd>/</kbd>), Konto rechts.
+- **Linke Leiste:** oben der **Bereichswechsler** (mit Suchfeld), darunter *Überblick*, *Suche* (nur in diesem Bereich), *Bereichseinstellungen* (nur Administratoren) und *Neue Seite*. Es folgt der **Seitenbaum** des Bereichs. Ohne geöffneten Bereich zeigt die Leiste den zuletzt besuchten.
+- **Handy:** untere Leiste mit Start, Bereiche, Suche und Konto; die linke Leiste öffnet sich über **Bereiche und Seiten**.
+- **Startseite und Überblick eines Bereichs:** Reiter *Zuletzt geändert*, *Favoriten* und *Von mir erstellt*.
+
 ## Sprachen
 
 Die Oberfläche gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch. Jeder Benutzer wählt seine Sprache unter **Konto**; ohne Auswahl gilt die Sprache des Browsers, sonst die Standardsprache des Workspaces.
