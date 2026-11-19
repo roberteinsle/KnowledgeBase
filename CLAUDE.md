@@ -69,7 +69,8 @@ Modules: `Workspace` (settings, users, home page), `Auth` (magic link, passkeys,
 - Space icons: `spaces.icon_path` on the private disk (upload via Filament, raster images only), delivered only via `SpaceIconController` with a permission check; `SpaceService::replaceIcon()` deletes the old file.
 - `Workspace::current()` is cached per request (scoped binding) – never cache in static properties, otherwise tests leak into each other.
 - No passwords: `password.confirm` (Laravel/passkey package) points to `/confirm` (passkey or confirmation link); every sign-in counts as fresh confirmation for 15 minutes (`Login` listener in `AuthServiceProvider`). Do not put POST/DELETE routes behind `password.confirm` (the redirect back would be a GET) – protect the GET page in front instead.
-- Filament resources/pages use the trait `App\Filament\Concerns\AdminOnly` and write through the services in `handleRecordCreation`/`handleRecordUpdate`.
+- Filament resources/pages use the trait `App\Filament\Concerns\AdminOnly` and write through the services in `handleRecordCreation`/`handleRecordUpdate`. Images from the private disk are shown via the app's own protected routes (e.g. `spaces.icon` as `ImageColumn` state), not via storage URLs. Avatars come from `App\Filament\LocalAvatarProvider` (Filament's default calls ui-avatars.com).
+- The CSP is only sent outside `local`, so the dev server does not show CSP problems – check uploads and new frontend libraries against the production image (`docker build` + run) before shipping.
 - Test data and examples only with invented names; never take names from screenshots or real systems.
 
 **URLs:** all paths and Filament slugs are **English**, whatever the UI language (`/spaces/{space}`, `/pages/{page}/edit`, `/admin/users/create`).

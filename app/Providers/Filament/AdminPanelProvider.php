@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Core\Http\LegacyRedirects;
 use App\Core\Http\Middleware\SetLocale;
+use App\Filament\LocalAvatarProvider;
 use App\Modules\Workspace\Models\Workspace;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
@@ -39,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName(fn () => Workspace::current()->name.' · '.__('Administration'))
             ->colors(['primary' => Color::Indigo])
+            ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->userMenuItems([
                 Action::make('knowledgebase')
                     ->label(fn () => __('Back to the knowledge base'))

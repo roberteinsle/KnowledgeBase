@@ -23,7 +23,7 @@ After installation there is no user yet. The address from the environment variab
 
 ## Spaces
 
-**Administration → Spaces**: create, upload an icon, grant permissions, delete. **Open** jumps into the space.
+**Administration → Spaces**: create, upload an icon, grant permissions, delete. The list shows the uploaded icon (or the emoji next to the name). **Open** jumps into the space.
 
 ## Labels
 

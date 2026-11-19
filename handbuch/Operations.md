@@ -71,4 +71,5 @@ Every push to `main` triggers tests, the image build and the redeploy; the image
 - Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
 - Attachments and space icons on a private disk, delivered only after a permission check; only PDFs and raster images inline.
 - Markdown is rendered with escaped HTML; unsafe links are removed.
-- No external resources (fonts, CDNs) – everything is served by the app itself.
+- No external resources (fonts, CDNs, avatar services) – everything is served by the app itself; avatars in the administration area are generated locally.
+- The Content Security Policy only allows the app's own origin; `blob:` workers are allowed for image processing during uploads.

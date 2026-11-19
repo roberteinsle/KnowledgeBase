@@ -19,6 +19,8 @@ class SecurityHeaders
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
+            // FilePond (Filament uploads) processes images in a worker created from a blob: URL.
+            "worker-src 'self' blob:",
             "font-src 'self' data:",
             "connect-src 'self'".(app()->isLocal() ? ' ws: wss: http://localhost:5173 http://127.0.0.1:5173' : ''),
             "frame-ancestors 'none'",

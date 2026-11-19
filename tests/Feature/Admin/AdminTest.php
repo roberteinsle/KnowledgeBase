@@ -116,3 +116,20 @@ it('rejects SVG files as space icon in the admin form', function () {
         ->call('create')
         ->assertHasFormErrors(['icon_path']);
 });
+
+it('shows the space icon in the admin table via the protected icon route', function () {
+    Storage::fake('local');
+    Storage::disk('local')->put('space-icons/a.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='));
+    $admin = admin();
+    $withImage = space([], ['name' => 'Mit Bild', 'icon_path' => 'space-icons/a.png']);
+    space([], ['name' => 'Ohne Bild', 'icon' => '🚀']);
+
+    $this->actingAs($admin)->get('/admin/spaces')
+        ->assertOk()
+        ->assertSee(route('spaces.icon', $withImage), false)
+        ->assertSee('🚀');
+});
+
+it('never loads avatars from an external service in the admin area', function () {
+    $this->actingAs(admin())->get('/admin')->assertOk()->assertDontSee('ui-avatars.com')->assertSee('data:image/svg+xml;base64,', false);
+});

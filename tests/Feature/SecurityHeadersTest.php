@@ -29,3 +29,11 @@ it('does not leak details in errors', function () {
 
     $this->actingAs(member())->get('/pages/999999')->assertNotFound()->assertDontSee('ModelNotFoundException');
 });
+
+it('allows blob workers for uploads but nothing from other origins', function () {
+    app()->detectEnvironment(fn () => 'production');
+
+    $csp = $this->get('/login')->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("worker-src 'self' blob:")->toContain("img-src 'self' data: blob:")->not->toContain('https:');
+});

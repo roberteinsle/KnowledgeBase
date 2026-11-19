@@ -25,6 +25,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -111,6 +112,11 @@ class SpaceResource extends Resource
     {
         return $table
             ->columns([
+                // The app's own icon route (with permission check), not a storage URL.
+                ImageColumn::make('icon_image')->label(__('Icon'))
+                    ->state(fn (Space $record) => $record->hasImage() ? route('spaces.icon', $record).'?v='.$record->updated_at->timestamp : null)
+                    ->circular()
+                    ->imageSize(32),
                 TextColumn::make('name')->label(__('Name'))->searchable()->sortable()
                     ->formatStateUsing(fn (string $state, Space $record) => trim(($record->hasImage() ? '' : ($record->icon ?? '')).' '.$state)),
                 TextColumn::make('slug')->label(__('URL name')),
