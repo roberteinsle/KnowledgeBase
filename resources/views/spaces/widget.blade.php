@@ -3,7 +3,7 @@
     <div class="card text-sm text-slate-600">
         {{ __('You do not have access to any space yet.') }}
         @if (auth()->user()->isAdmin())
-            <a class="text-indigo-700 underline" href="{{ route('filament.admin.resources.bereiche.create') }}">{{ __('Create the first space') }}</a>
+            <a class="text-indigo-700 underline" href="{{ route('filament.admin.resources.spaces.create') }}">{{ __('Create the first space') }}</a>
         @else
             {{ __('Ask an administrator to add you.') }}
         @endif
