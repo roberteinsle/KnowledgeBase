@@ -3,7 +3,7 @@
   // PHP-Version = Dockerfile (ARG PHP_VERSION) = composer.json. Alle drei im selben Commit ändern.
   "image": "mcr.microsoft.com/devcontainers/php:8.5-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "26" },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "forwardPorts": [8000, 5173, 5432],
