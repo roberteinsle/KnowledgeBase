@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@laravel/passkeys": "^0.4.1",
-        "@tiptap/core": "^3.34.0",
+        "@tiptap/core": "^3.35.0",
         "@tiptap/extension-list": "^3.34.0",
         "@tiptap/extension-table": "^3.34.0",
         "@tiptap/extensions": "^3.34.0",
